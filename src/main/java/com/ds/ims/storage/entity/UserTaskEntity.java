@@ -16,7 +16,8 @@ import javax.persistence.*;
 @Table(name = "user_task")
 public class UserTaskEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_task_seq")
+    @SequenceGenerator(name = "user_task_seq", sequenceName = "user_task_seq", allocationSize = 1)
     Long id;
 
     @ManyToOne
@@ -27,6 +28,7 @@ public class UserTaskEntity {
     @JoinColumn(name = "task_id")
     TaskEntity task;
 
+    @Column(name = "forked_gitlab_repository_url")
     String forkedGitLabRepositoryUrl;
 
     @Enumerated(EnumType.STRING)

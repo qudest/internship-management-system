@@ -15,7 +15,8 @@ import javax.persistence.*;
 @Table(name = "lesson")
 public class LessonEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "lesson_seq")
+    @SequenceGenerator(name = "lesson_seq", sequenceName = "lesson_seq", allocationSize = 1)
     Long id;
 
     String title;

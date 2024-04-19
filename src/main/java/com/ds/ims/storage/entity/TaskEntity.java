@@ -15,11 +15,13 @@ import javax.persistence.*;
 @Table(name = "task")
 public class TaskEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "task_seq")
+    @SequenceGenerator(name = "task_seq", sequenceName = "task_seq", allocationSize = 1)
     Long id;
 
     String title;
 
+    @Column(name = "gitlab_repository_url")
     String gitLabRepositoryUrl;
 
     @ManyToOne

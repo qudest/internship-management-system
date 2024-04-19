@@ -18,7 +18,8 @@ import java.time.LocalDateTime;
 @Table(name = "internship_user")
 public class InternshipUserEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "internship_user_seq")
+    @SequenceGenerator(name = "internship_user_seq", sequenceName = "internship_user_seq", allocationSize = 1)
     Long id;
 
     @ManyToOne
@@ -32,7 +33,9 @@ public class InternshipUserEntity {
     @Enumerated(EnumType.STRING)
     InternshipUserStatus status;
 
+    @Column(name = "entry_date")
     LocalDateTime entryDate;
 
-    LocalDate completionDate;
+    @Column(name = "completion_date")
+    LocalDateTime completionDate;
 }
