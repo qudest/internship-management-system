@@ -3,6 +3,8 @@ HELP.md
 gradlew
 gradlew.bat
 build/
+data
+.DS_Store
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
