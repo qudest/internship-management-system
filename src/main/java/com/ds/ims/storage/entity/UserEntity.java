@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(name = "user")
+@Table(name = "\"user\"")
 public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
@@ -56,4 +56,8 @@ public class UserEntity {
     String speciality;
 
     Integer course;
+
+    @OneToOne
+    @JoinColumn(name = "account_id")
+    AccountEntity account;
 }

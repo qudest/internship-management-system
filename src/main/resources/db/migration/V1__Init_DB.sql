@@ -1,65 +1,134 @@
-CREATE SEQUENCE internship_seq START 1;
-CREATE SEQUENCE internship_user_seq START 1;
-CREATE SEQUENCE lesson_seq START 1;
-CREATE SEQUENCE user_seq START 1;
-CREATE SEQUENCE task_seq START 1;
-CREATE SEQUENCE user_task_seq START 1;
+create sequence account_seq start 1 increment 1;
+create sequence admin_seq start 1 increment 1;
+create sequence internship_seq start 1 increment 1;
+create sequence internship_user_seq start 1 increment 1;
+create sequence lesson_seq start 1 increment 1;
+create sequence role_seq start 1 increment 1;
+create sequence task_seq start 1 increment 1;
+create sequence user_seq start 1 increment 1;
+create sequence user_task_seq start 1 increment 1;
 
-CREATE TABLE internship (
-    id BIGSERIAL PRIMARY KEY,
-    title VARCHAR(255),
-    description TEXT,
-    start_date TIMESTAMP,
-    end_date TIMESTAMP,
-    recording_start_date TIMESTAMP,
-    status VARCHAR(255)
+create table account
+(
+    id       int8         not null,
+    login    varchar(255) not null unique ,
+    password varchar(255) not null,
+    primary key (id)
 );
 
-CREATE TABLE "user" (
-    id BIGSERIAL PRIMARY KEY,
-    first_name VARCHAR(255),
-    middle_name VARCHAR(255),
-    last_name VARCHAR(255),
-    email VARCHAR(255),
-    mobile VARCHAR(255),
-    telegram_id VARCHAR(255),
-    personal_information TEXT,
-    birth_date DATE,
-    city VARCHAR(255),
-    educational_status VARCHAR(255),
-    university VARCHAR(255),
-    faculty VARCHAR(255),
-    speciality VARCHAR(255),
-    course INTEGER
+create table account_roles
+(
+    account_id int8 not null,
+    role_id    int8 not null
 );
 
-CREATE TABLE internship_user (
-    id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT REFERENCES "user"(id),
-    internship_id BIGINT REFERENCES internship(id),
-    status VARCHAR(255),
-    entry_date TIMESTAMP,
-    completion_date TIMESTAMP
+create table admin
+(
+    id         int8 not null,
+    account_id int8,
+    primary key (id)
 );
 
-CREATE TABLE lesson (
-    id BIGSERIAL PRIMARY KEY,
-    title VARCHAR(255),
-    description TEXT,
-    internship_id BIGINT REFERENCES internship(id)
+create table internship
+(
+    id                   int8 not null,
+    description          text,
+    end_date             timestamp,
+    recording_start_date timestamp,
+    start_date           timestamp,
+    status               varchar(255),
+    title                varchar(255),
+    primary key (id)
 );
 
-CREATE TABLE task (
-    id BIGSERIAL PRIMARY KEY,
-    title VARCHAR(255),
-    gitlab_repository_url TEXT,
-    lesson_id BIGINT REFERENCES lesson(id)
+create table internship_user
+(
+    id              int8 not null,
+    completion_date timestamp,
+    entry_date      timestamp,
+    status          varchar(255),
+    internship_id   int8,
+    user_id         int8,
+    primary key (id)
 );
 
-CREATE TABLE user_task (
-    id BIGSERIAL PRIMARY KEY,
-    user_id BIGINT REFERENCES "user"(id),
-    task_id BIGINT REFERENCES task(id),
-    forked_gitlab_repository_url TEXT,
-    status VARCHAR(255)
+create table lesson
+(
+    id            int8 not null,
+    description   text,
+    title         varchar(255),
+    internship_id int8,
+    primary key (id)
 );
+
+create table role
+(
+    id   int8         not null,
+    name varchar(255) not null unique,
+    primary key (id)
+);
+
+create table task
+(
+    id                    int8 not null,
+    gitlab_repository_url varchar(255),
+    title                 varchar(255),
+    lesson_id             int8,
+    primary key (id)
+);
+
+create table "user"
+(
+    id                   int8 not null,
+    birth_date           date,
+    city                 varchar(255),
+    course               int4,
+    educational_status   varchar(255),
+    email                varchar(255),
+    faculty              varchar(255),
+    first_name           varchar(255),
+    last_name            varchar(255),
+    middle_name          varchar(255),
+    mobile               varchar(255),
+    personal_information text,
+    speciality           varchar(255),
+    telegram_id          varchar(255),
+    university           varchar(255),
+    account_id           int8,
+    primary key (id)
+);
+
+create table user_task
+(
+    id                           int8 not null,
+    forked_gitlab_repository_url varchar(255),
+    status                       varchar(255),
+    task_id                      int8,
+    user_id                      int8,
+    primary key (id)
+);
+
+alter table if exists account
+    add constraint UK_5vxwyorsr92jce3ore6h93k6q unique (login);
+alter table if exists role
+    add constraint UK_8sewwnpamngi6b1dwaa88askk unique (name);
+alter table if exists account_roles
+    add constraint FKi84870gssnbi37wfqfifekghb foreign key (role_id) references role;
+alter table if exists account_roles
+    add constraint FKtp61eta5i06bug3w1qr6286uf foreign key (account_id) references account;
+alter table if exists admin
+    add constraint FKn2eatyxq78i3wg18tt0jf56lw foreign key (account_id) references account;
+alter table if exists internship_user
+    add constraint FK3myjq09rlwd6hpt38daiqg67d foreign key (internship_id) references internship;
+alter table if exists internship_user
+    add constraint FKjpv7hwigdr2mgsg2n72wvn2m8 foreign key (user_id) references "user";
+alter table if exists lesson
+    add constraint FKaj40dxk9s9g2q1jurbioxy6it foreign key (internship_id) references internship;
+alter table if exists task
+    add constraint FK5x8hrayewoued0usmps6rhk9e foreign key (lesson_id) references lesson;
+alter table if exists "user"
+    add constraint FKg6e3jb9kwr725fa0st0cuyvxl foreign key (account_id) references account;
+alter table if exists user_task
+    add constraint FKvs34bjkmpbk2e54qlrol3ilt foreign key (task_id) references task;
+alter table if exists user_task
+    add constraint FK8q1joy748n5hutw4ukoi7xead foreign key (user_id) references "user";
