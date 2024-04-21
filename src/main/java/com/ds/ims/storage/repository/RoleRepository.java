@@ -1,4 +1,8 @@
 package com.ds.ims.storage.repository;
 
-public interface RoleRepository {
+import com.ds.ims.storage.entity.RoleEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface RoleRepository extends JpaRepository<RoleEntity, Integer> {
+
 }
