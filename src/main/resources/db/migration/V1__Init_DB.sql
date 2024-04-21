@@ -11,7 +11,7 @@ create sequence user_task_seq start 1 increment 1;
 create table account
 (
     id       int8         not null,
-    login    varchar(255) not null unique ,
+    username varchar(255) not null unique ,
     password varchar(255) not null,
     primary key (id)
 );
@@ -109,7 +109,7 @@ create table user_task
 );
 
 alter table if exists account
-    add constraint UK_5vxwyorsr92jce3ore6h93k6q unique (login);
+    add constraint UK_5vxwyorsr92jce3ore6h93k6q unique (username);
 alter table if exists role
     add constraint UK_8sewwnpamngi6b1dwaa88askk unique (name);
 alter table if exists account_roles

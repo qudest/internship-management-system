@@ -21,7 +21,7 @@ public class AccountEntity {
     Long id;
 
     @Column(unique = true, nullable = false)
-    String login;
+    String username;
 
     @Column(nullable = false)
     String password;
