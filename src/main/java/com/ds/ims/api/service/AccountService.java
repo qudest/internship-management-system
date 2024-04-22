@@ -1,5 +1,7 @@
 package com.ds.ims.api.service;
 
+import com.ds.ims.api.dto.AccountDto;
+import com.ds.ims.api.dto.RegistrationAccountDto;
 import com.ds.ims.storage.entity.AccountEntity;
 import com.ds.ims.storage.repository.AccountRepository;
 import com.ds.ims.storage.repository.RoleRepository;
@@ -10,6 +12,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -23,8 +26,10 @@ import java.util.stream.Collectors;
 public class AccountService implements UserDetailsService {
 
     AccountRepository accountRepository;
-    //todo свой сервис для ролей
-    RoleRepository roleRepository;
+
+    RoleService roleService;
+
+    PasswordEncoder passwordEncoder;
 
     public Optional<AccountEntity> findByUsername(String username) {
         return accountRepository.findByUsername(username);
@@ -42,10 +47,11 @@ public class AccountService implements UserDetailsService {
         );
     }
 
-    public void createNewUser(AccountEntity accountEntity) {
-        //todo проверка на существование пользователя
-        //todo проверка на существование роли
-        accountEntity.setRoles(Collections.singletonList(roleRepository.findByName("USER").get()));
-        accountRepository.save(accountEntity);
+    public AccountEntity createNewUser(RegistrationAccountDto registrationAccountDto) {
+        AccountEntity accountEntity = new AccountEntity();
+        accountEntity.setUsername(registrationAccountDto.getUsername());
+        accountEntity.setPassword(passwordEncoder.encode(registrationAccountDto.getPassword()));
+        accountEntity.setRoles(Collections.singletonList(roleService.getUserRole()));
+        return accountRepository.save(accountEntity);
     }
 }
