@@ -14,7 +14,3 @@ values
 insert into admin (id, account_id)
 values
 (nextval('admin_seq'), 2);
-
-insert into "user" (id, account_id)
-values
-(nextval('user_seq'), 1);
