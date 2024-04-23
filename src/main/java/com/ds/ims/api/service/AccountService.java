@@ -1,13 +1,13 @@
 package com.ds.ims.api.service;
 
-import com.ds.ims.api.dto.AccountDto;
 import com.ds.ims.api.dto.RegistrationAccountDto;
 import com.ds.ims.storage.entity.AccountEntity;
 import com.ds.ims.storage.repository.AccountRepository;
-import com.ds.ims.storage.repository.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -35,6 +35,10 @@ public class AccountService implements UserDetailsService {
         return accountRepository.findByUsername(username);
     }
 
+    public Optional<AccountEntity> findById(Long id) {
+        return accountRepository.findById(id);
+    }
+
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
@@ -47,7 +51,7 @@ public class AccountService implements UserDetailsService {
         );
     }
 
-    public AccountEntity createNewUser(RegistrationAccountDto registrationAccountDto) {
+    public AccountEntity createNewAccount(RegistrationAccountDto registrationAccountDto) {
         AccountEntity accountEntity = new AccountEntity();
         accountEntity.setUsername(registrationAccountDto.getUsername());
         accountEntity.setPassword(passwordEncoder.encode(registrationAccountDto.getPassword()));
