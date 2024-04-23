@@ -32,7 +32,7 @@ public class UserEntity {
 
     String email;
 
-    String mobile;
+    String phone;
 
     @Column(name = "telegram_id")
     String telegramId;
