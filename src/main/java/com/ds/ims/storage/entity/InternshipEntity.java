@@ -31,7 +31,7 @@ public class InternshipEntity {
     @Column(name = "end_date")
     LocalDateTime endDate;
 
-    @Column(name = "recording_start_date")
+    @Column(name = "recording_end_date")
     LocalDateTime recordingEndDate;
 
     @Enumerated(EnumType.STRING)

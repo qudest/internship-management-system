@@ -34,7 +34,7 @@ create table internship
     id                   int8 not null,
     description          text,
     end_date             timestamp,
-    recording_start_date timestamp,
+    recording_end_date timestamp,
     start_date           timestamp,
     status               varchar(255),
     title                varchar(255),
