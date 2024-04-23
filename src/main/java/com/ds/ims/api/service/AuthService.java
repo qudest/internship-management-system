@@ -14,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -45,7 +47,14 @@ public class AuthService {
             return new ResponseEntity<>(new ErrorDto(HttpStatus.BAD_REQUEST.value(), "User with this username already exists"), HttpStatus.BAD_REQUEST);
         }
         //todo mapper
-        AccountEntity account = accountService.createNewUser(registrationAccountDto);
+        AccountEntity account = accountService.createNewAccount(registrationAccountDto);
         return ResponseEntity.ok(new AccountDto(account.getId(), account.getUsername()));
+    }
+
+    public Long getAuthenticatedAccountId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        return accountService.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Account not found")).getId();
     }
 }
