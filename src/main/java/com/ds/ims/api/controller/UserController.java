@@ -21,8 +21,8 @@ public class UserController {
     InternshipService internshipService;
     AuthService authService;
     // потом убрать
-    // СДЕЛАНО GET_INTERNSHIPS = "/internships"; // GET
-    // private static final String GET_INTERNSHIP_BY_ID = GET_INTERNSHIPS + "/{id}"; // POST DELETE
+    // СДЕЛАНО GET_INTERNSHIPS // GET
+    // СДЕЛАНО GET_INTERNSHIP_BY_ID // PUT DELETE
     // private static final String GET_LESSONS = GET_INTERNSHIP_BY_ID + "/lessons"; // GET
     // private static final String GET_LESSON_BY_ID = GET_LESSONS + "/{id}"; // GET
     // private static final String GET_TASKS = GET_LESSON_BY_ID + "/tasks"; // GET
@@ -37,8 +37,13 @@ public class UserController {
         return internshipService.getInternshipsForUser(authService.getAuthenticatedAccountId());
     }
 
-    @PostMapping(ApiPaths.INTERNSHIP_BY_ID)
+    @PutMapping(ApiPaths.INTERNSHIP_BY_ID)
     public ResponseEntity<?> registerToInternship(@PathVariable Long id, @RequestBody UserDto userDto) {
         return internshipService.registerToInternship(id, authService.getAuthenticatedAccountId(), userDto);
+    }
+
+    @DeleteMapping(ApiPaths.INTERNSHIP_BY_ID)
+    public ResponseEntity<?> deleteRequestToInternship(@PathVariable Long id) {
+        return internshipService.deleteRequestToInternship(id, authService.getAuthenticatedAccountId());
     }
 }

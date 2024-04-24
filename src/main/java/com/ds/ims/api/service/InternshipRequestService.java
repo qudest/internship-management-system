@@ -29,4 +29,9 @@ public class InternshipRequestService {
             return internshipRequestRepository.save(internshipRequestEntity);
         }
     }
+
+    public void deleteInternshipRequest(InternshipEntity internship, UserEntity user) {
+        Optional<InternshipRequestEntity> existingRequest = internshipRequestRepository.findByInternshipIdAndUserId(internship.getId(), user.getId());
+        existingRequest.ifPresent(internshipRequestRepository::delete);
+    }
 }

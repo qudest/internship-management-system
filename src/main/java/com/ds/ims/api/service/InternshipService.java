@@ -62,4 +62,17 @@ public class InternshipService {
         internshipRequestService.createInternshipRequest(internship, userEntity);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    public ResponseEntity<?> deleteRequestToInternship(Long internshipId, Long accountId) {
+        InternshipEntity internship = internshipRepository.findById(internshipId).orElseThrow(() -> new RuntimeException("Internship not found"));
+
+        if (!internship.getStatus().equals(InternshipStatus.OPEN_FOR_REGISTRATION)) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        UserEntity user = userService.findByAccountId(accountId).orElseThrow(() -> new RuntimeException("User not found"));
+
+        internshipRequestService.deleteInternshipRequest(internship, user);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }
