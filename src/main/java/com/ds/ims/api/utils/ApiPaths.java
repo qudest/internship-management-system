@@ -10,7 +10,7 @@ public class ApiPaths {
     public static final String INTERNSHIPS = "/internships";
     public static final String INTERNSHIP_BY_ID = INTERNSHIPS + "/{id}";
     public static final String LESSONS = INTERNSHIP_BY_ID + "/lessons";
-    public static final String LESSON_BY_ID = LESSONS + "/{id}";
+    public static final String LESSON_BY_ID = LESSONS + "/{lessonId}";
     public static final String TASKS = LESSON_BY_ID + "/tasks";
-    public static final String TASK_BY_ID = TASKS + "/{id}";
+    public static final String TASK_BY_ID = TASKS + "/{taskId}";
 }
