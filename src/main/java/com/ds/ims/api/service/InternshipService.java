@@ -26,7 +26,7 @@ import java.util.Optional;
 public class InternshipService {
     UserService userService;
     InternshipRepository internshipRepository;
-    InternshipUserRepository internshipUserRepository;
+    InternshipUserService internshipUserService;
     InternshipRequestService internshipRequestService;
 
     public Optional<InternshipDto> getInternshipById(Long id) {
@@ -41,10 +41,9 @@ public class InternshipService {
 
     public List<InternshipDto> getInternshipsForUser(Long accountId) {
         Long userId = userService.findByAccountId(accountId).orElseThrow(() -> new RuntimeException("User not found")).getId();
-        List<InternshipUserEntity> internshipUserEntities = internshipUserRepository.findByUserIdAndStatus(userId, InternshipUserStatus.ACTIVE);
+        List<InternshipUserEntity> internshipUserEntities = internshipUserService.findByUserIdAndStatus(userId, InternshipUserStatus.ACTIVE);
         List<InternshipDto> internships = new ArrayList<>();
         for (InternshipUserEntity internshipUserEntity: internshipUserEntities) {
-            System.out.println("bye");
             System.out.println(internshipUserEntity.getInternship().getId());
             internships.add(InternshipMapper.INSTANCE.toDto(internshipUserEntity.getInternship()));
         }
