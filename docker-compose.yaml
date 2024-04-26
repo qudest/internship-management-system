@@ -32,3 +32,28 @@ services:
       - "5050:80"
     volumes:
       - ./data/pgadmin:/var/lib/pgadmin
+  gitlab:
+    image: gitlab/gitlab-ce:latest
+    restart: always
+    hostname: gitlab.ims.com
+    environment:
+      - GITLAB_OMNIBUS_CONFIG=external_url 'http://gitlab.ims.com'
+    ports:
+      - "443:443"
+      - "80:80"
+      - "22:22"
+    volumes:
+        - ./data/gitlab/config:/etc/gitlab
+        - ./data/gitlab/logs:/var/log/gitlab
+        - ./data/gitlab/data:/var/opt/gitlab
+  gitlab-runner:
+    image: gitlab/gitlab-runner:alpine
+    restart: always
+    depends_on:
+      - gitlab
+    volumes:
+      - ./data/gitlab-runner/config:/etc/gitlab-runner
+      - ./data/gitlab-runner/data:/var/run/docker.sock
+
+
+
