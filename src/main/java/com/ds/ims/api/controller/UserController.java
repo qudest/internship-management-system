@@ -3,9 +3,11 @@ package com.ds.ims.api.controller;
 import com.ds.ims.api.dto.InternshipDto;
 import com.ds.ims.api.dto.LessonDto;
 import com.ds.ims.api.dto.UserDto;
+import com.ds.ims.api.dto.UserTaskDto;
 import com.ds.ims.api.service.AuthService;
 import com.ds.ims.api.service.InternshipService;
 import com.ds.ims.api.service.LessonService;
+import com.ds.ims.api.service.UserTaskService;
 import com.ds.ims.api.utils.ApiPaths;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -22,17 +24,16 @@ import java.util.List;
 public class UserController {
     InternshipService internshipService;
     LessonService lessonService;
+    UserTaskService userTaskService;
     AuthService authService;
     // потом убрать
     // СДЕЛАНО GET_INTERNSHIPS // GET
     // СДЕЛАНО GET_INTERNSHIP_BY_ID // PUT DELETE
     // СДЕЛАНО GET_LESSONS = GET_INTERNSHIP_BY_ID + "/lessons"; // GET
-    // СДЕЛАНО private static final String GET_LESSON_BY_ID = GET_LESSONS + "/{id}"; // GET
-    // private static final String GET_TASKS = GET_LESSON_BY_ID + "/tasks"; // GET
-    // private static final String GET_TASK_BY_ID = GET_TASKS + "/{id}"; // GET
-
+    // СДЕЛАНО GET_LESSON_BY_ID = GET_LESSONS + "/{id}"; // GET
+    // GET_TASKS = GET_LESSON_BY_ID + "/tasks"; // GET
+    // GET_TASK_BY_ID = GET_TASKS + "/{id}"; // GET
     // Возможность посмотреть успеваемость
-
     // Возможность получать все сообщения пользователя
 
     @GetMapping(ApiPaths.INTERNSHIPS)
@@ -58,5 +59,15 @@ public class UserController {
     @GetMapping(ApiPaths.LESSON_BY_ID)
     public LessonDto getLesson(@PathVariable Long id, @PathVariable Long lessonId) {
         return lessonService.getLesson(id, lessonId, authService.getAuthenticatedAccountId());
+    }
+
+    @GetMapping(ApiPaths.TASKS)
+    public List<UserTaskDto> getTasks(@PathVariable Long id, @PathVariable Long lessonId) {
+        return userTaskService.getTasks(id, lessonId, authService.getAuthenticatedAccountId());
+    }
+
+    @GetMapping(ApiPaths.TASK_BY_ID)
+    public UserTaskDto getTask(@PathVariable Long id, @PathVariable Long lessonId, @PathVariable Long taskId) {
+        return userTaskService.getTask(id, lessonId, taskId, authService.getAuthenticatedAccountId());
     }
 }
