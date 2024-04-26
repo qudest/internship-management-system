@@ -3,6 +3,7 @@ package com.ds.ims.api.service;
 import com.ds.ims.api.dto.LessonDto;
 import com.ds.ims.api.mapper.LessonMapper;
 import com.ds.ims.storage.entity.InternshipUserEntity;
+import com.ds.ims.storage.entity.LessonEntity;
 import com.ds.ims.storage.entity.status.InternshipUserStatus;
 import com.ds.ims.storage.repository.LessonRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,8 +28,11 @@ public class LessonService {
 
     public LessonDto getLesson(Long internshipId, Long lessonId, Long authenticatedAccountId) {
         userCheck(internshipId, authenticatedAccountId);
+        return LessonMapper.INSTANCE.toDto(findByIdAndInternshipId(lessonId, internshipId));
+    }
 
-        return LessonMapper.INSTANCE.toDto(lessonRepository.findByIdAndInternshipId(lessonId, internshipId));
+    public LessonEntity findByIdAndInternshipId(Long internshipId, Long lessonId) {
+        return lessonRepository.findByIdAndInternshipId(lessonId, internshipId);
     }
 
     private void userCheck(Long internshipId, Long authenticatedAccountId) {
