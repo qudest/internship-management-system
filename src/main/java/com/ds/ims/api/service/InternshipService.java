@@ -29,8 +29,12 @@ public class InternshipService {
     InternshipUserService internshipUserService;
     InternshipRequestService internshipRequestService;
 
+    public InternshipEntity getInternshipEntityById(Long id) {
+        return internshipRepository.findById(id).orElseThrow(() -> new RuntimeException("Internship not found"));
+    }
+
     public Optional<InternshipDto> getInternshipById(Long id) {
-        InternshipEntity internship = internshipRepository.findById(id).orElseThrow(() -> new RuntimeException("Internship not found"));
+        InternshipEntity internship = getInternshipEntityById(id);
         return Optional.of(InternshipMapper.INSTANCE.toDto(internship));
     }
 
@@ -82,6 +86,19 @@ public class InternshipService {
         System.out.printf(internship.toString());
         internship.setStatus(InternshipStatus.OPEN_FOR_REGISTRATION);
         internshipRepository.save(internship);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    public ResponseEntity<?> updateInternship(Long id, InternshipDto internshipDto) {
+        InternshipEntity existingInternship = getInternshipEntityById(id);
+        InternshipMapper.INSTANCE.updateEntityFromDto(internshipDto, existingInternship);
+        internshipRepository.save(existingInternship);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    public ResponseEntity<?> deleteInternship(Long id) {
+        InternshipEntity internship = getInternshipEntityById(id);
+        internshipRepository.delete(internship);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

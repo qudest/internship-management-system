@@ -34,4 +34,14 @@ public class AdminController {
     public ResponseEntity<?> createInternship(@RequestBody InternshipDto internshipDto) {
         return internshipService.createInternship(internshipDto);
     }
+
+    @PutMapping(ApiPaths.INTERNSHIP_BY_ID)
+    public ResponseEntity<?> updateInternship(@PathVariable Long id, @RequestBody InternshipDto internshipDto) {
+        return internshipService.updateInternship(id, internshipDto);
+    }
+
+    @DeleteMapping(ApiPaths.INTERNSHIP_BY_ID)
+    public ResponseEntity<?> deleteInternship(@PathVariable Long id) {
+        return internshipService.deleteInternship(id);
+    }
 }
