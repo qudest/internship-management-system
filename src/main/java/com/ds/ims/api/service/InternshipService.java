@@ -39,6 +39,7 @@ public class InternshipService {
         return InternshipMapper.INSTANCE.toDtos(internships);
     }
 
+    //todo в internshipUserEntity перенести
     public List<InternshipDto> getInternshipsForUser(Long accountId) {
         Long userId = userService.findByAccountId(accountId).orElseThrow(() -> new RuntimeException("User not found")).getId();
         List<InternshipUserEntity> internshipUserEntities = internshipUserService.findByUserIdAndStatus(userId, InternshipUserStatus.ACTIVE);
@@ -49,7 +50,7 @@ public class InternshipService {
         }
         return internships;
     }
-
+    //todo в InternshipRequestService перенести
     public ResponseEntity<?> registerToInternship(Long internshipId, Long accountId, UserDto userDto) {
         InternshipEntity internship = internshipRepository.findById(internshipId).orElseThrow(() -> new RuntimeException("Internship not found"));
 
@@ -61,7 +62,7 @@ public class InternshipService {
         internshipRequestService.createInternshipRequest(internship, userEntity);
         return new ResponseEntity<>(HttpStatus.OK);
     }
-
+    //todo в InternshipRequestService перенести
     public ResponseEntity<?> deleteRequestToInternship(Long internshipId, Long accountId) {
         InternshipEntity internship = internshipRepository.findById(internshipId).orElseThrow(() -> new RuntimeException("Internship not found"));
 
@@ -72,6 +73,15 @@ public class InternshipService {
 
         internshipRequestService.deleteInternshipRequest(internship, user);
 
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    public ResponseEntity<?> createInternship(InternshipDto internshipDto) {
+        System.out.println(internshipDto);
+        InternshipEntity internship = InternshipMapper.INSTANCE.toEntity(internshipDto);
+        System.out.printf(internship.toString());
+        internship.setStatus(InternshipStatus.OPEN_FOR_REGISTRATION);
+        internshipRepository.save(internship);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }
