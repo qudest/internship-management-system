@@ -22,7 +22,7 @@ public class TaskEntity {
     String title;
 
     @Column(name = "gitlab_repository_url")
-    String gitLabRepositoryUrl;
+    String gitlabRepositoryUrl;
 
     @ManyToOne
     @JoinColumn(name = "lesson_id")

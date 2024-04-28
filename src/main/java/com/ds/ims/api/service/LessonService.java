@@ -25,17 +25,16 @@ public class LessonService {
 
     public List<LessonDto> getLessons(Long internshipId, Long authenticatedAccountId) {
         userCheck(internshipId, authenticatedAccountId);
-
         return LessonMapper.INSTANCE.toDtos(lessonRepository.findAllByInternshipId(internshipId));
     }
 
     public LessonDto getLesson(Long internshipId, Long lessonId, Long authenticatedAccountId) {
         userCheck(internshipId, authenticatedAccountId);
-        return LessonMapper.INSTANCE.toDto(findByIdAndInternshipId(lessonId, internshipId));
+        return LessonMapper.INSTANCE.toDto(findByIdAndInternshipId(internshipId, lessonId));
     }
 
     public LessonEntity findByIdAndInternshipId(Long internshipId, Long lessonId) {
-        return lessonRepository.findByIdAndInternshipId(lessonId, internshipId);
+        return lessonRepository.findByIdAndInternshipId(internshipId, lessonId).orElseThrow(() -> new RuntimeException("Lesson not found"));
     }
 
     //todo перенести в internshipUserService

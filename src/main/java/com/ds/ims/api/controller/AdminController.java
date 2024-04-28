@@ -1,9 +1,11 @@
 package com.ds.ims.api.controller;
 
+import com.ds.ims.api.dto.CreatingTaskDto;
 import com.ds.ims.api.dto.InternshipDto;
 import com.ds.ims.api.dto.LessonDto;
 import com.ds.ims.api.service.InternshipService;
 import com.ds.ims.api.service.LessonService;
+import com.ds.ims.api.service.TaskService;
 import com.ds.ims.api.utils.ApiPaths;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 public class AdminController {
     InternshipService internshipService;
     LessonService lessonService;
+    private final TaskService taskService;
     // потом убрать
     // СДЕЛАНО GET_INTERNSHIPS = "/internships"; // POST
     // СДЕЛАНО GET_INTERNSHIP_BY_ID = GET_INTERNSHIPS + "/{id}"; // PUT DELETE
@@ -62,5 +65,10 @@ public class AdminController {
     @DeleteMapping(ApiPaths.LESSON_BY_ID)
     public ResponseEntity<?> deleteLesson(@PathVariable Long id, @PathVariable Long lessonId) {
         return lessonService.deleteLesson(id, lessonId);
+    }
+
+    @PostMapping(ApiPaths.TASKS)
+    public ResponseEntity<?> createTask(@PathVariable Long id, @PathVariable Long lessonId, @RequestBody CreatingTaskDto creatingTaskDto) {
+        return taskService.createTask(id, lessonId, creatingTaskDto);
     }
 }
