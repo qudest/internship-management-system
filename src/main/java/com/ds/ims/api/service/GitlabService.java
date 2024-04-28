@@ -25,4 +25,14 @@ public class GitlabService {
         }
         return TaskMapper.INSTANCE.gitlabProjectToTaskEntity(project);
     }
+
+    public void deleteProject(String projectName) {
+        Project project;
+        try {
+            project = gitLabApi.getProjectApi().getProject("root", projectName);
+            gitLabApi.getProjectApi().deleteProject(project);
+        } catch (GitLabApiException e) {
+            throw new RuntimeException("Error while deleting project", e);
+        }
+    }
 }

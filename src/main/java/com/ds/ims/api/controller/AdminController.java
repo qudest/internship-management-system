@@ -27,8 +27,8 @@ public class AdminController {
     // СДЕЛАНО GET_LESSONS = GET_INTERNSHIP_BY_ID + "/lessons"; // POST
 
     // СДЕЛАНО GET_LESSON_BY_ID = GET_LESSONS + "/{id}"; // PUT DELETE
-    // GET_TASKS = GET_LESSON_BY_ID + "/tasks"; // POST
-    // GET_TASK_BY_ID = GET_TASKS + "/{id}"; // PUT DELETE;
+    // СДЕЛАНО GET_TASKS = GET_LESSON_BY_ID + "/tasks"; // POST
+    //  GET_TASK_BY_ID = GET_TASKS + "/{id}"; // DELETE;
 
     // Возможность проверить задачи занятия GET?
 
@@ -70,5 +70,10 @@ public class AdminController {
     @PostMapping(ApiPaths.TASKS)
     public ResponseEntity<?> createTask(@PathVariable Long id, @PathVariable Long lessonId, @RequestBody CreatingTaskDto creatingTaskDto) {
         return taskService.createTask(id, lessonId, creatingTaskDto);
+    }
+
+    @DeleteMapping(ApiPaths.TASK_BY_ID)
+    public ResponseEntity<?> deleteTask(@PathVariable Long id, @PathVariable Long lessonId, @PathVariable Long taskId) {
+        return taskService.deleteTask(id, lessonId, taskId);
     }
 }
