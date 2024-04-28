@@ -37,8 +37,9 @@ dependencies {
     implementation "org.mapstruct:mapstruct:${mapstructVersion}"
     annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
     testAnnotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
-    implementation('io.springfox:springfox-swagger2:2.9.2')
-    implementation('io.springfox:springfox-swagger-ui:2.9.2')
+    implementation 'io.springfox:springfox-swagger2:2.9.2'
+    implementation 'io.springfox:springfox-swagger-ui:2.9.2'
+    implementation 'org.gitlab4j:gitlab4j-api:5.5.0'
 }
 
 tasks.named('test') {

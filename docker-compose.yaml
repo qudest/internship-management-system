@@ -35,9 +35,10 @@ services:
   gitlab:
     image: gitlab/gitlab-ce:latest
     restart: always
-    hostname: gitlab.ims.com
+    hostname: ${GITLAB_HOSTNAME}
     environment:
-      - GITLAB_OMNIBUS_CONFIG=external_url 'http://gitlab.ims.com'
+      - GITLAB_OMNIBUS_CONFIG=external_url '${GITLAB_EXTERNAL_URL}'
+      - GITLAB_ROOT_PASSWORD=${GITLAB_ROOT_PASSWORD}
     ports:
       - "443:443"
       - "80:80"
