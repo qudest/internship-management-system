@@ -18,7 +18,7 @@ public class TaskEntity {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "task_seq")
     @SequenceGenerator(name = "task_seq", sequenceName = "task_seq", allocationSize = 1)
     Long id;
-
+    @Column(unique = true, nullable = false)
     String title;
 
     @Column(name = "gitlab_repository_url")

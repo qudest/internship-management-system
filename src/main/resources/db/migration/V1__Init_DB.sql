@@ -81,7 +81,7 @@ create table role
 create table task
 (
     id                    int8 not null,
-    title                 varchar(255),
+    title                 varchar(255) not null unique,
     gitlab_repository_url varchar(255),
     lesson_id             int8,
     primary key (id)
