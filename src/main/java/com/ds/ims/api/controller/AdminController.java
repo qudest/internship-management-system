@@ -3,6 +3,8 @@ package com.ds.ims.api.controller;
 import com.ds.ims.api.dto.CreatingTaskDto;
 import com.ds.ims.api.dto.InternshipDto;
 import com.ds.ims.api.dto.LessonDto;
+import com.ds.ims.api.dto.RequestDto;
+import com.ds.ims.api.service.InternshipRequestService;
 import com.ds.ims.api.service.InternshipService;
 import com.ds.ims.api.service.LessonService;
 import com.ds.ims.api.service.TaskService;
@@ -13,6 +15,8 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @RestController
@@ -20,7 +24,8 @@ import org.springframework.web.bind.annotation.*;
 public class AdminController {
     InternshipService internshipService;
     LessonService lessonService;
-    private final TaskService taskService;
+    TaskService taskService;
+    InternshipRequestService internshipRequestService;
     // потом убрать
     // СДЕЛАНО GET_INTERNSHIPS = "/internships"; // POST
     // СДЕЛАНО GET_INTERNSHIP_BY_ID = GET_INTERNSHIPS + "/{id}"; // PUT DELETE
@@ -28,7 +33,7 @@ public class AdminController {
 
     // СДЕЛАНО GET_LESSON_BY_ID = GET_LESSONS + "/{id}"; // PUT DELETE
     // СДЕЛАНО GET_TASKS = GET_LESSON_BY_ID + "/tasks"; // POST
-    //  GET_TASK_BY_ID = GET_TASKS + "/{id}"; // DELETE;
+    // СДЕЛАНО GET_TASK_BY_ID = GET_TASKS + "/{id}"; // DELETE;
 
     // Возможность проверить задачи занятия GET?
 
@@ -75,5 +80,15 @@ public class AdminController {
     @DeleteMapping(ApiPaths.TASK_BY_ID)
     public ResponseEntity<?> deleteTask(@PathVariable Long id, @PathVariable Long lessonId, @PathVariable Long taskId) {
         return taskService.deleteTask(id, lessonId, taskId);
+    }
+
+    @PostMapping(ApiPaths.TASK_BY_ID)
+    public ResponseEntity<?> forkTask(@PathVariable Long id, @PathVariable Long lessonId, @PathVariable Long taskId) {
+        return taskService.forkTask(id, lessonId, taskId);
+    }
+
+    @GetMapping(ApiPaths.REQUESTS)
+    public List<RequestDto> getPendingRequestsForInternship(@PathVariable("id") Long internshipId) {
+        return internshipRequestService.getPendingInternshipRequestsByInternshipId(internshipId);
     }
 }

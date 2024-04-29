@@ -34,4 +34,10 @@ public class TaskService {
     public Optional<TaskEntity> findById(Long id) {
         return taskRepository.findById(id);
     }
+
+    //todo impl
+    public ResponseEntity<?> forkTask(Long id, Long lessonId, Long taskId) {
+
+        return ResponseEntity.ok().build();
+    }
 }

@@ -1,5 +1,7 @@
 package com.ds.ims.api.service;
 
+import com.ds.ims.api.dto.RequestDto;
+import com.ds.ims.api.mapper.RequestMapper;
 import com.ds.ims.storage.entity.InternshipEntity;
 import com.ds.ims.storage.entity.InternshipRequestEntity;
 import com.ds.ims.storage.entity.UserEntity;
@@ -9,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -22,6 +25,7 @@ public class InternshipRequestService {
         if (existingRequest.isPresent()) {
             return existingRequest.get();
         } else {
+            //todo mapper
             InternshipRequestEntity internshipRequestEntity = new InternshipRequestEntity();
             internshipRequestEntity.setInternship(internship);
             internshipRequestEntity.setUser(user);
@@ -33,5 +37,10 @@ public class InternshipRequestService {
     public void deleteInternshipRequest(InternshipEntity internship, UserEntity user) {
         Optional<InternshipRequestEntity> existingRequest = internshipRequestRepository.findByInternshipIdAndUserId(internship.getId(), user.getId());
         existingRequest.ifPresent(internshipRequestRepository::delete);
+    }
+
+    public List<RequestDto> getPendingInternshipRequestsByInternshipId(Long internshipId) {
+        List<InternshipRequestEntity> requests = internshipRequestRepository.findAllByInternshipIdAndStatus(internshipId, InternshipRequestStatus.PENDING);
+        return RequestMapper.INSTANCE.toDtos(requests);
     }
 }
