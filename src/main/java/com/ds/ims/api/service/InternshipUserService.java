@@ -23,4 +23,8 @@ public class InternshipUserService {
     public Optional<InternshipUserEntity> findByUserIdAndInternshipId(Long userId, Long internshipId) {
         return internshipUserRepository.findByUserIdAndInternshipId(userId, internshipId);
     }
+
+    public void save(InternshipUserEntity internshipUserEntity) {
+        internshipUserRepository.save(internshipUserEntity);
+    }
 }

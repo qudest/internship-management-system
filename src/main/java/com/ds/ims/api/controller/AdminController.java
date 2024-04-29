@@ -91,4 +91,9 @@ public class AdminController {
     public List<RequestDto> getPendingRequestsForInternship(@PathVariable("id") Long internshipId) {
         return internshipRequestService.getPendingInternshipRequestsByInternshipId(internshipId);
     }
+
+    @PutMapping(ApiPaths.REQUEST_BY_ID)
+    public ResponseEntity<?> considerRequest(@PathVariable("id") Long internshipId, @PathVariable("requestId") Long requestId, @RequestParam("isAccepted") boolean isAccepted) {
+        return internshipRequestService.considerRequest(internshipId, requestId, isAccepted);
+    }
 }

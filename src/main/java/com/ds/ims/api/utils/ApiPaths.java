@@ -15,4 +15,5 @@ public class ApiPaths {
     public static final String TASK_BY_ID = TASKS + "/{taskId}";
 
     public static final String REQUESTS = INTERNSHIP_BY_ID + "/requests";
+    public static final String REQUEST_BY_ID = REQUESTS + "/{requestId}";
 }
