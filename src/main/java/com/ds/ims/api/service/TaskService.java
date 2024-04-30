@@ -8,6 +8,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -39,5 +40,9 @@ public class TaskService {
     public ResponseEntity<?> forkTask(Long id, Long lessonId, Long taskId) {
 
         return ResponseEntity.ok().build();
+    }
+
+    public List<TaskEntity> findAllByLessonId(Long lessonId) {
+        return taskRepository.findAllByLessonId(lessonId);
     }
 }
