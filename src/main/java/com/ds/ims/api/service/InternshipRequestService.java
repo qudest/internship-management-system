@@ -73,6 +73,7 @@ public class InternshipRequestService {
             internshipUserEntity.setInternship(findInternshipByRequestId(requestId));
             internshipUserEntity.setStatus(InternshipUserStatus.ACTIVE);
             internshipUserEntity.setEntryDate(LocalDateTime.now());
+            internshipUserService.createGitlabUser(findUserByRequestId(requestId));
             internshipUserService.save(internshipUserEntity);
         } else {
             RequestMapper.INSTANCE.updateEntityStatus(request, InternshipRequestStatus.REJECTED);

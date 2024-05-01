@@ -1,5 +1,6 @@
 package com.ds.ims.api.mapper;
 
+import com.ds.ims.api.dto.TaskDto;
 import com.ds.ims.storage.entity.TaskEntity;
 import org.gitlab4j.api.models.Project;
 import org.mapstruct.Mapper;
@@ -13,4 +14,5 @@ public interface TaskMapper {
     @Mapping(target = "title", source = "name")
     @Mapping(target = "gitlabRepositoryUrl", source = "webUrl")
     TaskEntity gitlabProjectToTaskEntity(Project project);
+    TaskDto taskEntityToTaskDto(TaskEntity taskEntity);
 }
