@@ -1,9 +1,6 @@
 package com.ds.ims.api.controller;
 
-import com.ds.ims.api.dto.InternshipDto;
-import com.ds.ims.api.dto.LessonDto;
-import com.ds.ims.api.dto.UserDto;
-import com.ds.ims.api.dto.UserTaskDto;
+import com.ds.ims.api.dto.*;
 import com.ds.ims.api.service.AuthService;
 import com.ds.ims.api.service.InternshipService;
 import com.ds.ims.api.service.LessonService;
@@ -69,5 +66,10 @@ public class UserController {
     @GetMapping(ApiPaths.TASK_BY_ID)
     public UserTaskDto getTask(@PathVariable Long id, @PathVariable Long lessonId, @PathVariable Long taskId) {
         return userTaskService.getTask(id, lessonId, taskId, authService.getAuthenticatedAccountId());
+    }
+
+    @GetMapping(ApiPaths.GRADE)
+    public GradeDto getGrade(@PathVariable Long id) {
+        return userTaskService.getUserGrade(id, authService.getAuthenticatedAccountId());
     }
 }

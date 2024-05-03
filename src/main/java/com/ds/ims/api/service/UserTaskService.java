@@ -1,5 +1,6 @@
 package com.ds.ims.api.service;
 
+import com.ds.ims.api.dto.GradeDto;
 import com.ds.ims.api.dto.UserTaskDto;
 import com.ds.ims.api.mapper.UserTaskMapper;
 import com.ds.ims.storage.entity.InternshipUserEntity;
@@ -37,7 +38,7 @@ public class UserTaskService {
         for (UserTaskEntity userTask : userTasks) {
             TaskEntity task = userTask.getTask();
             if (task.getLesson().getId().equals(lessonId) && task.getLesson().getInternship().getId().equals(internshipId)) {
-                userTaskDtos.add(UserTaskMapper.INSTANCE.toDto(task.getTitle(), userTask));
+                userTaskDtos.add(UserTaskMapper.INSTANCE.toDto(userTask));
             }
         }
 
@@ -54,7 +55,7 @@ public class UserTaskService {
         UserEntity user = userService.findByAccountId(authenticatedAccountId).orElseThrow(() -> new NullPointerException("User not found with account id: " + authenticatedAccountId));
 
         UserTaskEntity userTaskEntity = findByUserIdAndTaskId(user.getId(), taskId);
-        return UserTaskMapper.INSTANCE.toDto(task.getTitle(), userTaskEntity);
+        return UserTaskMapper.INSTANCE.toDto(userTaskEntity);
     }
 
     public UserTaskEntity findByUserIdAndTaskId(Long userId, Long taskId) {
@@ -78,8 +79,37 @@ public class UserTaskService {
         UserTaskEntity userTaskEntity = new UserTaskEntity();
         userTaskEntity.setUser(user);
         userTaskEntity.setTask(task);
-        userTaskEntity.setForkedGitLabRepositoryUrl(httpUrlToRepo);
+        userTaskEntity.setForkedGitlabRepositoryUrl(httpUrlToRepo);
         userTaskEntity.setStatus(UserTaskStatus.IN_PROGRESS);
         userTaskRepository.save(userTaskEntity);
+    }
+
+    private GradeDto getGrade(Long internshipId, UserEntity user) {
+        List<UserTaskEntity> userTasks = userTaskRepository.findAllByUserId(user.getId());
+        List<UserTaskDto> userTaskDtos = new ArrayList<>();
+        for (UserTaskEntity userTask : userTasks) {
+            if (userTask.getTask().getLesson().getInternship().getId().equals(internshipId)) {
+                userTaskDtos.add(UserTaskMapper.INSTANCE.toDto(userTask));
+            }
+        }
+        GradeDto gradeDto = new GradeDto();
+        gradeDto.setUsername(user.getAccount().getUsername());
+        gradeDto.setUserTasks(userTaskDtos);
+        return gradeDto;
+    }
+
+    public GradeDto getUserGrade(Long internshipId, Long authenticatedAccountId) {
+        UserEntity user = userService.findByAccountId(authenticatedAccountId).orElseThrow(() -> new NullPointerException("User not found with account id: " + authenticatedAccountId));
+        return getGrade(internshipId, user);
+    }
+
+    public List<GradeDto> getUsersGrade(Long internshipId) {
+        List<InternshipUserEntity> internshipUsers = internshipUserService.findAllByInternshipIdAndStatus(internshipId, InternshipUserStatus.ACTIVE);
+        List<GradeDto> gradeDtos = new ArrayList<>();
+        for (InternshipUserEntity internshipUser : internshipUsers) {
+            UserEntity user = internshipUser.getUser();
+            gradeDtos.add(getGrade(internshipId, user));
+        }
+        return gradeDtos;
     }
 }

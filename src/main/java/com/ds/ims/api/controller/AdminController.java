@@ -87,4 +87,9 @@ public class AdminController {
     public ResponseEntity<?> considerRequest(@PathVariable("id") Long internshipId, @PathVariable("requestId") Long requestId, @RequestParam("isAccepted") boolean isAccepted) {
         return internshipRequestService.considerRequest(internshipId, requestId, isAccepted);
     }
+
+    @GetMapping(ApiPaths.GRADE)
+    public List<GradeDto> getGrade(@PathVariable Long id) {
+        return userTaskService.getUsersGrade(id);
+    }
 }

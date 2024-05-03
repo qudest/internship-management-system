@@ -5,8 +5,11 @@ import com.ds.ims.storage.entity.UserTaskEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
-@Mapper
+import java.util.List;
+
+@Mapper(uses = TaskMapper.class)
 public interface UserTaskMapper {
     UserTaskMapper INSTANCE = Mappers.getMapper(UserTaskMapper.class);
-    UserTaskDto toDto(String title, UserTaskEntity userTaskEntity);
+    UserTaskDto toDto(UserTaskEntity userTaskEntity);
+    List<UserTaskDto> toDtos(List<UserTaskEntity> userTaskEntities);
 }

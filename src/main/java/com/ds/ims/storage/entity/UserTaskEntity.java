@@ -29,7 +29,7 @@ public class UserTaskEntity {
     TaskEntity task;
 
     @Column(name = "forked_gitlab_repository_url")
-    String forkedGitLabRepositoryUrl;
+    String forkedGitlabRepositoryUrl;
 
     @Enumerated(EnumType.STRING)
     UserTaskStatus status;

@@ -8,7 +8,7 @@ import lombok.experimental.FieldDefaults;
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserTaskDto {
-    String title;
+    TaskDto task;
     @JsonProperty("forked_gitlab_repository_url")
     String forkedGitlabRepositoryUrl;
     String status;
