@@ -1,6 +1,7 @@
 package com.ds.ims.api.service;
 
 import com.ds.ims.api.dto.CreatingTaskDto;
+import com.ds.ims.api.dto.MessageDto;
 import com.ds.ims.api.mapper.TaskMapper;
 import com.ds.ims.storage.entity.TaskEntity;
 import com.ds.ims.storage.entity.UserEntity;
@@ -13,6 +14,7 @@ import org.gitlab4j.api.models.Project;
 import org.gitlab4j.api.models.User;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +26,8 @@ import java.util.Map;
 public class GitlabService {
     GitLabApi gitlabApi;
     LastCheckDateService lastCheckDateService;
+    MessageService messageService;
+    AdminService adminService;
 
     public TaskEntity createProject(CreatingTaskDto creatingTaskDto) {
         Project project;
@@ -51,8 +55,12 @@ public class GitlabService {
             project = gitlabApi.getProjectApi().getProject("root", projectName);
             return gitlabApi.getProjectApi().forkProject(project.getId(), username);
         } catch (GitLabApiException e) {
+            MessageDto messageDto = new MessageDto();
+            messageDto.setText("Error while forking project for user " + username + " with project name " + projectName);
+            messageDto.setCreatedAt(LocalDateTime.now());
+            messageDto.setSenderName("System");
+            adminService.findAll().forEach(adminEntity -> messageService.sendMessage(adminEntity.getAccount(), messageDto));
             throw new RuntimeException("Error while forking project", e);
-            //todo сообщение админам
         }
     }
 
@@ -62,8 +70,7 @@ public class GitlabService {
         user.setEmail(userEntity.getEmail());
         user.setName(userEntity.getFirstName() + " " + userEntity.getLastName());
         try {
-            //todo пароль расшифровать
-            gitlabApi.getUserApi().createUser(user, userEntity.getAccount().getPassword(), false);
+            gitlabApi.getUserApi().createUser(user, userEntity.getAccount().getUsername(), false);
         } catch (GitLabApiException e) {
             throw new RuntimeException("Error while creating user", e);
         }
