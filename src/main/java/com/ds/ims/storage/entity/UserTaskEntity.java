@@ -5,6 +5,8 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
+import java.util.Date;
 
 @Getter
 @Setter
@@ -33,4 +35,7 @@ public class UserTaskEntity {
 
     @Enumerated(EnumType.STRING)
     UserTaskStatus status;
+
+    @Column(name = "last_check_date")
+    Date lastCheckDate;
 }

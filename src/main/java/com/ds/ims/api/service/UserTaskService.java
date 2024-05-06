@@ -1,7 +1,9 @@
 package com.ds.ims.api.service;
 
+import com.ds.ims.api.dto.CommitDto;
 import com.ds.ims.api.dto.GradeDto;
 import com.ds.ims.api.dto.UserTaskDto;
+import com.ds.ims.api.mapper.CommitMapper;
 import com.ds.ims.api.mapper.UserTaskMapper;
 import com.ds.ims.storage.entity.InternshipUserEntity;
 import com.ds.ims.storage.entity.TaskEntity;
@@ -12,13 +14,16 @@ import com.ds.ims.storage.entity.status.UserTaskStatus;
 import com.ds.ims.storage.repository.UserTaskRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.gitlab4j.api.models.Commit;
 import org.gitlab4j.api.models.Project;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.ws.rs.BadRequestException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -62,13 +67,17 @@ public class UserTaskService {
         return userTaskRepository.findByUserIdAndTaskId(userId, taskId);
     }
 
+    public UserTaskEntity findByForkedGitlabRepositoryUrl(String url) {
+        return userTaskRepository.findByForkedGitlabRepositoryUrl(url);
+    }
+
     public ResponseEntity<?> forkTaskForInternshipUsers(Long id, Long lessonId, Long taskId) {
         List<UserEntity> users = internshipUserService.findAllByInternshipIdAndStatus(id, InternshipUserStatus.ACTIVE)
                 .stream()
                 .map(InternshipUserEntity::getUser)
                 .collect(Collectors.toList());
         TaskEntity task = taskService.findById(taskId).get();
-        for (UserEntity user: users) {
+        for (UserEntity user : users) {
             Project project = gitlabService.forkProjectForUser(task.getTitle(), user.getAccount().getUsername());
             create(user, task, project.getHttpUrlToRepo());
         }
@@ -81,6 +90,7 @@ public class UserTaskService {
         userTaskEntity.setTask(task);
         userTaskEntity.setForkedGitlabRepositoryUrl(httpUrlToRepo);
         userTaskEntity.setStatus(UserTaskStatus.IN_PROGRESS);
+        userTaskEntity.setLastCheckDate(new Date());
         userTaskRepository.save(userTaskEntity);
     }
 
@@ -111,5 +121,17 @@ public class UserTaskService {
             gradeDtos.add(getGrade(internshipId, user));
         }
         return gradeDtos;
+    }
+
+    public List<CommitDto> getFreshCommits() {
+        List<CommitDto> commitDtos = new ArrayList<>();
+        Map<String, List<Commit>> commits = gitlabService.getCommits();
+        for (Map.Entry<String, List<Commit>> entry : commits.entrySet()) {
+            UserTaskEntity userTaskEntity = userTaskRepository.findByForkedGitlabRepositoryUrl(entry.getKey());
+            for (Commit commit : entry.getValue()) {
+                commitDtos.add(CommitMapper.INSTANCE.toDto(userTaskEntity, commit));
+            }
+        }
+        return commitDtos;
     }
 }

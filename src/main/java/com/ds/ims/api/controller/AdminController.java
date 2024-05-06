@@ -20,21 +20,9 @@ public class AdminController {
     LessonService lessonService;
     TaskService taskService;
     InternshipRequestService internshipRequestService;
-    private final UserTaskService userTaskService;
-    // потом убрать
-    // СДЕЛАНО GET_INTERNSHIPS = "/internships"; // POST
-    // СДЕЛАНО GET_INTERNSHIP_BY_ID = GET_INTERNSHIPS + "/{id}"; // PUT DELETE
-    // СДЕЛАНО GET_LESSONS = GET_INTERNSHIP_BY_ID + "/lessons"; // POST
-
-    // СДЕЛАНО GET_LESSON_BY_ID = GET_LESSONS + "/{id}"; // PUT DELETE
-    // СДЕЛАНО GET_TASKS = GET_LESSON_BY_ID + "/tasks"; // POST
-    // СДЕЛАНО GET_TASK_BY_ID = GET_TASKS + "/{id}"; // DELETE;
-
-    // Возможность проверить задачи занятия GET?
+    UserTaskService userTaskService;
 
     // Возможность оценить задачу
-
-    // Возможность сформировать ведомость по стажировке
 
     @PostMapping(ApiPaths.INTERNSHIPS)
     public ResponseEntity<?> createInternship(@RequestBody InternshipDto internshipDto) {
@@ -91,5 +79,10 @@ public class AdminController {
     @GetMapping(ApiPaths.GRADE)
     public List<GradeDto> getGrade(@PathVariable Long id) {
         return userTaskService.getUsersGrade(id);
+    }
+
+    @GetMapping("/commits")
+    public ResponseEntity<?> getCommits() {
+        return ResponseEntity.ok(userTaskService.getFreshCommits());
     }
 }

@@ -113,6 +113,7 @@ create table user_task
     id                           int8 not null,
     forked_gitlab_repository_url varchar(255),
     status                       varchar(255),
+    last_check_date              timestamp,
     task_id                      int8,
     user_id                      int8,
     primary key (id)

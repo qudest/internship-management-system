@@ -8,4 +8,5 @@ import java.util.List;
 public interface UserTaskRepository extends JpaRepository<UserTaskEntity, Long> {
     List<UserTaskEntity> findAllByUserId(Long userId);
     UserTaskEntity findByUserIdAndTaskId(Long userId, Long taskId);
+    UserTaskEntity findByForkedGitlabRepositoryUrl(String url);
 }
