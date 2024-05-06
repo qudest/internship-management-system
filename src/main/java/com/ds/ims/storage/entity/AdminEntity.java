@@ -20,6 +20,8 @@ public class AdminEntity {
     @SequenceGenerator(name = "admin_seq", sequenceName = "admin_seq", allocationSize = 1)
     Long id;
 
+    String name;
+
     @OneToOne
     @JoinColumn(name = "account_id")
     AccountEntity account;

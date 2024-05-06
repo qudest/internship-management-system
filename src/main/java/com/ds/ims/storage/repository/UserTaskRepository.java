@@ -4,8 +4,10 @@ import com.ds.ims.storage.entity.UserTaskEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserTaskRepository extends JpaRepository<UserTaskEntity, Long> {
+    Optional<UserTaskEntity> findById(Long id);
     List<UserTaskEntity> findAllByUserId(Long userId);
     UserTaskEntity findByUserIdAndTaskId(Long userId, Long taskId);
     UserTaskEntity findByForkedGitlabRepositoryUrl(String url);

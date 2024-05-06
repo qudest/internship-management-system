@@ -4,6 +4,7 @@ create sequence internship_request_seq start 1 increment 1;
 create sequence internship_seq start 1 increment 1;
 create sequence internship_user_seq start 1 increment 1;
 create sequence lesson_seq start 1 increment 1;
+create sequence message_seq start 1 increment 1;
 create sequence role_seq start 1 increment 1;
 create sequence task_seq start 1 increment 1;
 create sequence user_seq start 1 increment 1;
@@ -11,9 +12,9 @@ create sequence user_task_seq start 1 increment 1;
 
 create table account
 (
-    id       int8         not null,
+    id       int8                not null,
     username varchar(255) unique not null,
-    password varchar(255) not null,
+    password varchar(255)        not null,
     primary key (id)
 );
 
@@ -26,6 +27,7 @@ create table account_roles
 create table admin
 (
     id         int8 not null,
+    name       varchar(255),
     account_id int8,
     primary key (id)
 );
@@ -71,6 +73,16 @@ create table lesson
     primary key (id)
 );
 
+create table message
+(
+    id          int8 not null,
+    text        varchar(255),
+    sender_name varchar(255),
+    created_at  timestamp,
+    receiver_id int8,
+    primary key (id)
+);
+
 create table role
 (
     id   int8         not null,
@@ -80,7 +92,7 @@ create table role
 
 create table task
 (
-    id                    int8 not null,
+    id                    int8         not null,
     title                 varchar(255) not null unique,
     gitlab_repository_url varchar(255),
     lesson_id             int8,
@@ -94,7 +106,7 @@ create table "user"
     first_name           varchar(255),
     middle_name          varchar(255),
     email                varchar(255),
-    phone               varchar(255),
+    phone                varchar(255),
     telegram_id          varchar(255),
     personal_information text,
     birth_date           date,
@@ -139,6 +151,8 @@ alter table internship_user
     add constraint FKjpv7hwigdr2mgsg2n72wvn2m8 foreign key (user_id) references "user";
 alter table lesson
     add constraint FKaj40dxk9s9g2q1jurbioxy6it foreign key (internship_id) references internship;
+alter table message
+    add constraint FK4hbj90ctopccuptmpiuu65cd9 foreign key (receiver_id) references account;
 alter table task
     add constraint FK5x8hrayewoued0usmps6rhk9e foreign key (lesson_id) references lesson;
 alter table "user"

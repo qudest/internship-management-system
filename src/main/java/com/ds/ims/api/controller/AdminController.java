@@ -16,13 +16,13 @@ import java.util.List;
 @RestController
 @RequestMapping(ApiPaths.ADMIN)
 public class AdminController {
+    AuthService authService;
     InternshipService internshipService;
     LessonService lessonService;
     TaskService taskService;
     InternshipRequestService internshipRequestService;
     UserTaskService userTaskService;
-
-    // Возможность оценить задачу
+    MessageService messageService;
 
     @PostMapping(ApiPaths.INTERNSHIPS)
     public ResponseEntity<?> createInternship(@RequestBody InternshipDto internshipDto) {
@@ -34,7 +34,6 @@ public class AdminController {
         return internshipService.updateInternship(id, internshipDto);
     }
 
-    //todo сделать удаление юзеров от стажировки, уроков, тасков
     @DeleteMapping(ApiPaths.INTERNSHIP_BY_ID)
     public ResponseEntity<?> deleteInternship(@PathVariable Long id) {
         return internshipService.deleteInternship(id);
@@ -84,5 +83,15 @@ public class AdminController {
     @GetMapping("/commits")
     public ResponseEntity<?> getCommits() {
         return ResponseEntity.ok(userTaskService.getFreshCommits());
+    }
+
+    @GetMapping("/messages")
+    public List<MessageDto> getMessages() {
+        return messageService.getMessages(authService.getAuthenticatedAccountId());
+    }
+
+    @PutMapping("/review/{userTaskId}")
+    public ResponseEntity<?> reviewTask(@PathVariable Long userTaskId, @RequestBody TaskReviewDto taskReviewDto) {
+        return userTaskService.reviewTask(userTaskId, taskReviewDto, authService.getAuthenticatedAccountId());
     }
 }

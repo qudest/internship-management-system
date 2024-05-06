@@ -1,14 +1,9 @@
 package com.ds.ims.api.service;
 
-import com.ds.ims.api.dto.CommitDto;
-import com.ds.ims.api.dto.GradeDto;
-import com.ds.ims.api.dto.UserTaskDto;
+import com.ds.ims.api.dto.*;
 import com.ds.ims.api.mapper.CommitMapper;
 import com.ds.ims.api.mapper.UserTaskMapper;
-import com.ds.ims.storage.entity.InternshipUserEntity;
-import com.ds.ims.storage.entity.TaskEntity;
-import com.ds.ims.storage.entity.UserEntity;
-import com.ds.ims.storage.entity.UserTaskEntity;
+import com.ds.ims.storage.entity.*;
 import com.ds.ims.storage.entity.status.InternshipUserStatus;
 import com.ds.ims.storage.entity.status.UserTaskStatus;
 import com.ds.ims.storage.repository.UserTaskRepository;
@@ -20,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.ws.rs.BadRequestException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -30,11 +26,13 @@ import java.util.stream.Collectors;
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 @Service
 public class UserTaskService {
+    AdminService adminService;
     UserTaskRepository userTaskRepository;
     InternshipUserService internshipUserService;
     GitlabService gitlabService;
     TaskService taskService;
     UserService userService;
+    MessageService messageService;
 
     public List<UserTaskDto> getTasks(Long internshipId, Long lessonId, Long authenticatedAccountId) {
         List<UserTaskEntity> userTasks = userTaskRepository.findAllByUserId(authenticatedAccountId);
@@ -65,6 +63,10 @@ public class UserTaskService {
 
     public UserTaskEntity findByUserIdAndTaskId(Long userId, Long taskId) {
         return userTaskRepository.findByUserIdAndTaskId(userId, taskId);
+    }
+
+    public UserTaskEntity findById(Long id) {
+        return userTaskRepository.findById(id).orElseThrow(() -> new NullPointerException("User task not found with id: " + id));
     }
 
     public UserTaskEntity findByForkedGitlabRepositoryUrl(String url) {
@@ -128,10 +130,42 @@ public class UserTaskService {
         Map<String, List<Commit>> commits = gitlabService.getCommits();
         for (Map.Entry<String, List<Commit>> entry : commits.entrySet()) {
             UserTaskEntity userTaskEntity = userTaskRepository.findByForkedGitlabRepositoryUrl(entry.getKey());
+            if (userTaskEntity.getStatus() == UserTaskStatus.ACCEPTED) {
+                continue;
+            }
             for (Commit commit : entry.getValue()) {
                 commitDtos.add(CommitMapper.INSTANCE.toDto(userTaskEntity, commit));
             }
         }
         return commitDtos;
+    }
+
+    public ResponseEntity<?> reviewTask(Long userTaskId, TaskReviewDto taskReviewDto, Long authenticatedAccountId) {
+        UserTaskEntity userTaskEntity = findById(userTaskId);
+        userTaskEntity.setStatus(UserTaskStatus.valueOf(taskReviewDto.getStatus()));
+
+        String sender = adminService.findByAccountId(authenticatedAccountId).getName();
+        LocalDateTime createdAt = LocalDateTime.now();
+        AccountEntity receiver = userTaskEntity.getUser().getAccount();
+
+        MessageDto reviewResult = new MessageDto();
+        reviewResult.setText("Task "
+                + userTaskEntity.getTask().getTitle()
+                + "(" + userTaskEntity.getForkedGitlabRepositoryUrl()
+                + ") has been " + taskReviewDto.getStatus().toLowerCase());
+        reviewResult.setSenderName(sender);
+        reviewResult.setCreatedAt(createdAt);
+        messageService.sendMessage(receiver, reviewResult);
+
+        if (!taskReviewDto.getComment().isEmpty()) {
+            MessageDto comment = new MessageDto();
+            comment.setText(userTaskEntity.getForkedGitlabRepositoryUrl() + " " + taskReviewDto.getComment());
+            comment.setSenderName(sender);
+            comment.setCreatedAt(createdAt);
+            messageService.sendMessage(receiver, comment);
+        }
+
+        userTaskRepository.save(userTaskEntity);
+        return ResponseEntity.ok().build();
     }
 }

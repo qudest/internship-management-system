@@ -11,6 +11,6 @@ values
 (1, 1),
 (2, 2);
 
-insert into admin (id, account_id)
+insert into admin (id, name, account_id)
 values
-(nextval('admin_seq'), 2);
+(nextval('admin_seq'), 'root', 2);

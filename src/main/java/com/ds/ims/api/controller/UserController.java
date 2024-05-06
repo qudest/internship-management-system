@@ -1,10 +1,7 @@
 package com.ds.ims.api.controller;
 
 import com.ds.ims.api.dto.*;
-import com.ds.ims.api.service.AuthService;
-import com.ds.ims.api.service.InternshipService;
-import com.ds.ims.api.service.LessonService;
-import com.ds.ims.api.service.UserTaskService;
+import com.ds.ims.api.service.*;
 import com.ds.ims.api.utils.ApiPaths;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -23,15 +20,7 @@ public class UserController {
     LessonService lessonService;
     UserTaskService userTaskService;
     AuthService authService;
-    // потом убрать
-    // СДЕЛАНО GET_INTERNSHIPS // GET
-    // СДЕЛАНО GET_INTERNSHIP_BY_ID // PUT DELETE
-    // СДЕЛАНО GET_LESSONS = GET_INTERNSHIP_BY_ID + "/lessons"; // GET
-    // СДЕЛАНО GET_LESSON_BY_ID = GET_LESSONS + "/{id}"; // GET
-    // GET_TASKS = GET_LESSON_BY_ID + "/tasks"; // GET
-    // GET_TASK_BY_ID = GET_TASKS + "/{id}"; // GET
-    // Возможность посмотреть успеваемость
-    // Возможность получать все сообщения пользователя
+    MessageService messageService;
 
     @GetMapping(ApiPaths.INTERNSHIPS)
     public List<InternshipDto> getInternshipsWithRegistration() {
@@ -71,5 +60,10 @@ public class UserController {
     @GetMapping(ApiPaths.GRADE)
     public GradeDto getGrade(@PathVariable Long id) {
         return userTaskService.getUserGrade(id, authService.getAuthenticatedAccountId());
+    }
+
+    @GetMapping("messages")
+    public List<MessageDto> getMessages() {
+        return messageService.getMessages(authService.getAuthenticatedAccountId());
     }
 }
