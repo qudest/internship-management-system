@@ -6,6 +6,9 @@ import lombok.experimental.FieldDefaults;
 import javax.persistence.*;
 import java.util.List;
 
+/**
+ * Сущность для роли
+ */
 @Getter
 @Setter
 @Builder
@@ -15,14 +18,23 @@ import java.util.List;
 @Entity
 @Table(name = "role")
 public class RoleEntity {
+    /**
+     * Идентификатор
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "role_seq")
     @SequenceGenerator(name = "role_seq", sequenceName = "role_seq", allocationSize = 1)
     Long id;
 
+    /**
+     * Название
+     */
     @Column(unique = true, nullable = false)
     String name;
 
+    /**
+     * Аккаунты с данной ролью
+     */
     @ManyToMany(mappedBy = "roles")
     List<AccountEntity> accounts;
 }

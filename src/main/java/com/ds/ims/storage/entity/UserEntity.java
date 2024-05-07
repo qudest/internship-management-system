@@ -7,6 +7,9 @@ import lombok.experimental.FieldDefaults;
 import javax.persistence.*;
 import java.time.LocalDate;
 
+/**
+ * Сущность для пользователя
+ */
 @Getter
 @Setter
 @Builder
@@ -16,48 +19,99 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "\"user\"")
 public class UserEntity {
+    /**
+     * Идентификатор
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_seq")
     @SequenceGenerator(name = "user_seq", sequenceName = "user_seq", allocationSize = 1)
     Long id;
 
-    @Column(name = "first_name")
+    /**
+     * Имя
+     */
+    @Column(name = "first_name", nullable = false)
     String firstName;
 
+    /**
+     * Отчество
+     */
     @Column(name = "middle_name")
     String middleName;
 
-    @Column(name = "last_name")
+    /**
+     * Фамилия
+     */
+    @Column(name = "last_name", nullable = false)
     String lastName;
 
+    /**
+     * Email
+     */
+    @Column(unique = true, nullable = false)
     String email;
 
+    /**
+     * Телефон
+     */
+    @Column(nullable = false)
     String phone;
 
-    @Column(name = "telegram_id")
+    /**
+     * Telegram ID
+     */
+    @Column(name = "telegram_id", nullable = false)
     String telegramId;
 
+    /**
+     * Информация о пользователе
+     */
     @Column(name = "personal_information")
     String personalInformation;
 
-    @Column(name = "birth_date")
+    /**
+     * День рождения
+     */
+    @Column(name = "birth_date", nullable = false)
     LocalDate birthDate;
 
+    /**
+     * Город
+     */
+    @Column(nullable = false)
     String city;
 
-    @Column(name = "educational_status")
+    /**
+     * Статус образования
+     */
+    @Column(name = "educational_status", nullable = false)
     @Enumerated(EnumType.STRING)
     EducationalStatus educationalStatus;
 
+    /**
+     * Университет
+     */
     String university;
 
+    /**
+     * Факультет
+     */
     String faculty;
 
+    /**
+     * Специальность
+     */
     String speciality;
 
+    /**
+     * Курс
+     */
     Integer course;
 
-    @OneToOne
+    /**
+     * Аккаунт к которому привязан пользователь
+     */
+    @OneToOne(optional = false)
     @JoinColumn(name = "account_id")
     AccountEntity account;
 }

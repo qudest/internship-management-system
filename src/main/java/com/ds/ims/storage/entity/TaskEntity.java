@@ -5,6 +5,9 @@ import lombok.experimental.FieldDefaults;
 
 import javax.persistence.*;
 
+/**
+ * Сущность для задания
+ */
 @Getter
 @Setter
 @Builder
@@ -14,17 +17,30 @@ import javax.persistence.*;
 @Entity
 @Table(name = "task")
 public class TaskEntity {
+    /**
+     * Идентификатор
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "task_seq")
     @SequenceGenerator(name = "task_seq", sequenceName = "task_seq", allocationSize = 1)
     Long id;
+
+    /**
+     * Название
+     */
     @Column(unique = true, nullable = false)
     String title;
 
-    @Column(name = "gitlab_repository_url")
+    /**
+     * URL репозитория в GitLab
+     */
+    @Column(name = "gitlab_repository_url", nullable = false)
     String gitlabRepositoryUrl;
 
-    @ManyToOne
+    /**
+     * Урок к которому относится задание
+     */
+    @ManyToOne(optional = false)
     @JoinColumn(name = "lesson_id")
     LessonEntity lesson;
 }

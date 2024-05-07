@@ -6,6 +6,9 @@ import lombok.experimental.FieldDefaults;
 
 import javax.persistence.*;
 
+/**
+ * Сущность для администратора
+ */
 @Getter
 @Setter
 @Builder
@@ -15,14 +18,24 @@ import javax.persistence.*;
 @Entity
 @Table(name = "admin")
 public class AdminEntity {
+    /**
+     * Идентификатор
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "admin_seq")
     @SequenceGenerator(name = "admin_seq", sequenceName = "admin_seq", allocationSize = 1)
     Long id;
 
+    /**
+     * Имя
+     */
+    @Column(nullable = false)
     String name;
 
-    @OneToOne
+    /**
+     * Привязка к аккаунту
+     */
+    @OneToOne(optional = false)
     @JoinColumn(name = "account_id")
     AccountEntity account;
 }

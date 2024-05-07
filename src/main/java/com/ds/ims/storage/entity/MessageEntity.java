@@ -6,6 +6,9 @@ import lombok.experimental.FieldDefaults;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
+/**
+ * Сущность для сообщения
+ */
 @Getter
 @Setter
 @Builder
@@ -15,20 +18,36 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "message")
 public class MessageEntity {
+    /**
+     * Идентификатор
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "message_seq")
     @SequenceGenerator(name = "message_seq", sequenceName = "message_seq", allocationSize = 1)
     Long id;
 
+    /**
+     * Текст
+     */
+    @Column(nullable = false)
     String text;
 
-    @Column(name = "sender_name")
+    /**
+     * Отправитель
+     */
+    @Column(name = "sender_name", nullable = false)
     String senderName;
 
-    @Column(name = "created_at")
+    /**
+     * Дата создания
+     */
+    @Column(name = "created_at", nullable = false)
     LocalDateTime createdAt;
 
-    @ManyToOne
+    /**
+     * Получатель(аккаунт)
+     */
+    @ManyToOne(optional = false)
     @JoinColumn(name = "receiver_id")
     AccountEntity receiver;
 }
