@@ -17,15 +17,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Утилиты для работы с JWT-токеном
+ */
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Component
 public class JwtTokenUtils {
+    /**
+     * Секретный ключ для подписи JWT-токена
+     */
     @Value("${jwt.secret}")
     String secret;
 
+    /**
+     * Время жизни JWT-токена
+     */
     @Value("${jwt.lifetime}")
     Duration jwtLifetime;
 
+    /**
+     * Генерация JWT-токена
+     */
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
         List<String> rolesList = userDetails.getAuthorities().stream()
@@ -43,14 +55,23 @@ public class JwtTokenUtils {
                 .compact();
     }
 
+    /**
+     * Получение имени пользователя из JWT-токена
+     */
     public String getUsername(String token) {
         return getAllClaimsFromToken(token).getSubject();
     }
 
+    /**
+     * Получение ролей пользователя из JWT-токена
+     */
     public List<String> getRoles(String token) {
         return (List<String>) getAllClaimsFromToken(token).get("roles");
     }
 
+    /**
+     * Получение всех данных из JWT-токена
+     */
     private Claims getAllClaimsFromToken(String token) {
         return Jwts.parser()
                 .setSigningKey(secret)
