@@ -1,4 +1,4 @@
-package com.ds.ims.api.config;
+package com.ds.ims.api.config.security;
 
 import com.ds.ims.api.utils.JwtTokenUtils;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -20,14 +20,22 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.stream.Collectors;
 
+/**
+ * Фильтр для обработки JWT-токена
+ */
 @Component
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @Slf4j
 public class JwtRequestFilter extends OncePerRequestFilter {
+    /**
+     * Утилиты для работы с JWT-токеном
+     */
     JwtTokenUtils jwtTokenUtils;
 
-    //todo если юзер покидает стажировку, то его токен все равно будет валидным, надо сделать проверку по статусу
+    /**
+     * Метод для обработки аутентификации по JWT-токену
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
         String authHeader = httpServletRequest.getHeader("Authorization");
@@ -39,9 +47,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             try {
                 username = jwtTokenUtils.getUsername(jwt);
             } catch (ExpiredJwtException e) {
-                log.debug("The token is expired");
+                log.error("The token is expired");
             } catch (SignatureException e) {
-                log.debug("The token is invalid");
+                log.error("The token is invalid");
             }
         }
 
@@ -49,7 +57,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
                     username,
                     null,
-                    //todo mapper
                     jwtTokenUtils.getRoles(jwt).stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList())
             );
             SecurityContextHolder.getContext().setAuthentication(token);
