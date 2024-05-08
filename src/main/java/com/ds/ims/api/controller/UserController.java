@@ -16,53 +16,116 @@ import java.util.List;
 @RestController
 @RequestMapping(ApiPaths.USER)
 public class UserController {
-    InternshipService internshipService;
+    InternshipUserService internshipUserService;
+    InternshipRequestService internshipRequestService;
     LessonService lessonService;
     UserTaskService userTaskService;
     AuthService authService;
     MessageService messageService;
 
+    /**
+     * Получение списка стажировок, на которые зарегистрирован пользователь
+     * GET api/user/internships
+     *
+     * @return - список стажировок
+     */
     @GetMapping(ApiPaths.INTERNSHIPS)
     public List<InternshipDto> getInternshipsWithRegistration() {
-        return internshipService.getInternshipsForUser(authService.getAuthenticatedAccountId());
+        return internshipUserService.getInternshipsForUser(authService.getAuthenticatedAccountId());
     }
 
+    /**
+     * Регистрация на стажировку
+     * PUT api/user/internships/{id}
+     *
+     * @param internshipId - id стажировки
+     * @param userDto      - данные пользователя
+     * @return - статус регистрации
+     */
     @PutMapping(ApiPaths.INTERNSHIP_BY_ID)
-    public ResponseEntity<?> registerToInternship(@PathVariable Long id, @RequestBody UserDto userDto) {
-        return internshipService.registerToInternship(id, authService.getAuthenticatedAccountId(), userDto);
+    public ResponseEntity<?> registerToInternship(@PathVariable Long internshipId, @RequestBody UserDto userDto) {
+        return internshipRequestService.registerToInternship(internshipId, authService.getAuthenticatedAccountId(), userDto);
     }
 
+    /**
+     * Отмена регистрации на стажировку
+     * DELETE api/user/internships/{id}
+     *
+     * @param internshipId - id стажировки
+     * @return - статус отмены регистрации
+     */
     @DeleteMapping(ApiPaths.INTERNSHIP_BY_ID)
-    public ResponseEntity<?> deleteRequestToInternship(@PathVariable Long id) {
-        return internshipService.deleteRequestToInternship(id, authService.getAuthenticatedAccountId());
+    public ResponseEntity<?> deleteRequestToInternship(@PathVariable Long internshipId) {
+        return internshipRequestService.deleteRequestToInternship(internshipId, authService.getAuthenticatedAccountId());
     }
 
-    @GetMapping(ApiPaths.LESSONS)
-    public List<LessonDto> getLessons(@PathVariable Long id) {
-        return lessonService.getLessons(id, authService.getAuthenticatedAccountId());
+    /**
+     * Получение списка уроков по стажировке
+     * GET api/user/internships/{internshipId}/lessons
+     *
+     * @param internshipId - id стажировки
+     * @return - список уроков
+     */
+    @GetMapping(ApiPaths.INTERNSHIP_BY_ID + ApiPaths.LESSONS)
+    public List<LessonDto> getLessons(@PathVariable Long internshipId) {
+        return lessonService.getLessons(internshipId, authService.getAuthenticatedAccountId());
     }
 
+    /**
+     * Получение урока по id
+     * GET api/user/lessons/{lessonId}
+     *
+     * @param lessonId - id урока
+     * @return - урок
+     */
     @GetMapping(ApiPaths.LESSON_BY_ID)
-    public LessonDto getLesson(@PathVariable Long id, @PathVariable Long lessonId) {
-        return lessonService.getLesson(id, lessonId, authService.getAuthenticatedAccountId());
+    public LessonDto getLesson(@PathVariable Long lessonId) {
+        return lessonService.getLesson(lessonId, authService.getAuthenticatedAccountId());
     }
 
-    @GetMapping(ApiPaths.TASKS)
-    public List<UserTaskDto> getTasks(@PathVariable Long id, @PathVariable Long lessonId) {
-        return userTaskService.getTasks(id, lessonId, authService.getAuthenticatedAccountId());
+    /**
+     * Получение списка заданий по уроку
+     * GET api/user/lessons/{lessonId}/tasks
+     *
+     * @param lessonId - id урока
+     * @return - список заданий
+     */
+    @GetMapping(ApiPaths.LESSON_BY_ID + ApiPaths.TASKS)
+    public List<UserTaskDto> getTasks(@PathVariable Long lessonId) {
+        return userTaskService.getTasks(lessonId, authService.getAuthenticatedAccountId());
     }
 
+    /**
+     * Получение задания по id
+     * GET api/user/tasks/{taskId}
+     *
+     * @param taskId - id задания
+     * @return - задание
+     */
     @GetMapping(ApiPaths.TASK_BY_ID)
-    public UserTaskDto getTask(@PathVariable Long id, @PathVariable Long lessonId, @PathVariable Long taskId) {
-        return userTaskService.getTask(id, lessonId, taskId, authService.getAuthenticatedAccountId());
+    public UserTaskDto getTask(@PathVariable Long taskId) {
+        return userTaskService.getTask(taskId, authService.getAuthenticatedAccountId());
     }
 
-    @GetMapping(ApiPaths.GRADE)
-    public GradeDto getGrade(@PathVariable Long id) {
-        return userTaskService.getUserGrade(id, authService.getAuthenticatedAccountId());
+    /**
+     * Получение оценок пользователя по стажировке
+     * GET api/user/internships/{internshipId}/grades
+     *
+     * @param internshipId - id стажировки
+     * @return - оценки
+     */
+    @GetMapping(ApiPaths.GRADES)
+    public GradeDto getGrades(@PathVariable Long internshipId) {
+        return userTaskService.getUserGrade(internshipId, authService.getAuthenticatedAccountId());
     }
 
-    @GetMapping("messages")
+    /**
+     * Получение сообщений
+     * GET api/user/messages
+     *
+     * @return - список сообщений
+     */
+    @GetMapping("/messages")
     public List<MessageDto> getMessages() {
         return messageService.getMessages(authService.getAuthenticatedAccountId());
     }
