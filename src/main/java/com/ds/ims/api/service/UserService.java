@@ -2,7 +2,6 @@ package com.ds.ims.api.service;
 
 import com.ds.ims.api.dto.UserDto;
 import com.ds.ims.api.mapper.UserMapper;
-import com.ds.ims.storage.entity.AccountEntity;
 import com.ds.ims.storage.entity.UserEntity;
 import com.ds.ims.storage.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +33,16 @@ public class UserService {
     }
 
     /**
+     * Поиск пользователя по email
+     *
+     * @param email - email пользователя
+     * @return - пользователь
+     */
+    public Optional<UserEntity> findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    /**
      * Создание нового пользователя
      *
      * @param accountId - id аккаунта
@@ -45,6 +54,9 @@ public class UserService {
         boolean exists = findByAccountId(accountId).isPresent();
         if (exists) {
             throw new BadRequestException("User already exists");
+        }
+        if (findByEmail(userDto.getEmail()).isPresent()) {
+            throw new BadRequestException("User with email " + userDto.getEmail() + " already exists");
         }
         userEntity.setAccount(accountService.findById(accountId)
                 .orElseThrow(() -> new NotFoundException("Account with id " + accountId + " not found")));

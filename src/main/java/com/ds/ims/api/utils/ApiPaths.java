@@ -25,6 +25,6 @@ public class ApiPaths {
     public static final String MESSAGES = "/messages";
 
     public static final String NEW_COMMITS = INTERNSHIP_BY_ID + "/new-commits";
-    public static final String REVIEW = "/user-tasks/{userTaskId}/";
+    public static final String REVIEW = "/user-tasks/{userTaskId}";
 
 }

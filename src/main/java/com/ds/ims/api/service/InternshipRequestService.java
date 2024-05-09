@@ -118,10 +118,13 @@ public class InternshipRequestService {
      */
     public ResponseEntity<?> considerRequest(Long requestId, boolean isAccepted) {
         InternshipRequestEntity request = findById(requestId).orElseThrow(() -> new NotFoundException("Request with id " + requestId + " not found"));
+        if (!request.getStatus().equals(InternshipRequestStatus.PENDING)) {
+            throw new BadRequestException("Request is already considered");
+        }
 
         if (isAccepted) {
-            RequestMapper.INSTANCE.updateEntityStatus(request, InternshipRequestStatus.ACCEPTED);
             internshipUserService.createInternshipUser(request.getInternship(), request.getUser());
+            RequestMapper.INSTANCE.updateEntityStatus(request, InternshipRequestStatus.ACCEPTED);
         } else {
             RequestMapper.INSTANCE.updateEntityStatus(request, InternshipRequestStatus.REJECTED);
         }
@@ -161,10 +164,6 @@ public class InternshipRequestService {
     public ResponseEntity<?> deleteRequestToInternship(Long internshipId, Long accountId) {
         InternshipEntity internship = internshipService.findById(internshipId)
                 .orElseThrow(() -> new NotFoundException("Internship with id " + internshipId + " not found"));
-
-        if (!internship.getStatus().equals(InternshipStatus.OPEN_FOR_REGISTRATION)) {
-            throw new BadRequestException("Internship is not open for registration");
-        }
 
         UserEntity user = userService.findByAccountId(accountId).orElseThrow(() -> new NotFoundException("User not found"));
         deleteInternshipRequest(internship, user);

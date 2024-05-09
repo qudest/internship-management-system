@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotFoundException;
 import java.time.LocalDateTime;
@@ -69,6 +70,9 @@ public class InternshipUserService {
      * @param user       - пользователь
      */
     public void createInternshipUser(InternshipEntity internship, UserEntity user) {
+        if (findByUserIdAndInternshipId(user.getId(), internship.getId()).isPresent()) {
+            throw new BadRequestException("User already registered to this internship");
+        }
         InternshipUserEntity internshipUserEntity = new InternshipUserEntity();
         internshipUserEntity.setUser(user);
         internshipUserEntity.setInternship(internship);
@@ -85,8 +89,12 @@ public class InternshipUserService {
      * @return список стажировок
      */
     public List<InternshipDto> getInternshipsForUser(Long accountId) {
-        UserEntity user = userService.findByAccountId(accountId).orElseThrow(() -> new NotFoundException("User not found"));
+        UserEntity user = userService.findByAccountId(accountId).orElseThrow(() -> new NotFoundException("User not registered to any internship"));
+        System.out.println("User: " + user.getId() + " " + user.getAccount().getId());
         List<InternshipUserEntity> internshipUserEntities = findByUserAndStatus(user, InternshipUserStatus.ACTIVE);
+        if (internshipUserEntities.isEmpty()) {
+            throw new NotFoundException("User not registered to any internship");
+        }
         List<InternshipDto> internships = new ArrayList<>();
         for (InternshipUserEntity internshipUserEntity : internshipUserEntities) {
             internships.add(InternshipMapper.INSTANCE.toDto(internshipUserEntity.getInternship()));
@@ -104,7 +112,7 @@ public class InternshipUserService {
         Long userId = userService.findByAccountId(accountId).orElseThrow(() -> new NotFoundException("User not found")).getId();
         Optional<InternshipUserEntity> internshipUserEntity = findByUserIdAndInternshipId(userId, internshipId);
         if (!internshipUserEntity.isPresent()) {
-            throw new ForbiddenException("User not registered to this internship");
+            throw new ForbiddenException("User don't have access to this internship");
         }
     }
 }

@@ -43,7 +43,10 @@ public class UserTaskService {
      * @return список заданий пользователя
      */
     public List<UserTaskDto> getTasks(Long lessonId, Long authenticatedAccountId) {
-        List<UserTaskEntity> userTasks = findAllByUserId(authenticatedAccountId);
+        UserEntity user = userService.findByAccountId(authenticatedAccountId)
+                .orElseThrow(() -> new NotFoundException("User with account id " + authenticatedAccountId + " not found"));
+        List<UserTaskEntity> userTasks = findAllByUserId(user.getId());
+        System.out.println(userTasks.size());
         List<UserTaskDto> userTaskDtos = new ArrayList<>();
 
         for (UserTaskEntity userTask : userTasks) {

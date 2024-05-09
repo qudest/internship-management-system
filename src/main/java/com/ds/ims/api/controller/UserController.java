@@ -125,7 +125,7 @@ public class UserController {
      *
      * @return - список сообщений
      */
-    @GetMapping("/messages")
+    @GetMapping(ApiPaths.MESSAGES)
     public List<MessageDto> getMessages() {
         return messageService.getMessages(authService.getAuthenticatedAccountId());
     }

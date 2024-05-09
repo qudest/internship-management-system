@@ -12,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.ws.rs.NotFoundException;
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -34,9 +33,9 @@ public class TaskService {
      * @return созданное задание
      */
     public ResponseEntity<?> createTask(Long lessonId, CreatingTaskDto creatingTaskDto) {
+        LessonEntity lessonEntity = lessonService.findById(lessonId).orElseThrow(() -> new NotFoundException("Lesson with id " + lessonId + " not found"));
         Project project = gitlabService.createProject(creatingTaskDto.getTitle());
         TaskEntity taskEntity = TaskMapper.INSTANCE.gitlabProjectToTaskEntity(project);
-        LessonEntity lessonEntity = lessonService.findById(lessonId).orElseThrow(() -> new NotFoundException("Lesson with id " + lessonId + " not found"));
         taskEntity.setLesson(lessonEntity);
         taskRepository.save(taskEntity);
         return ResponseEntity.ok(TaskMapper.INSTANCE.toDto(taskEntity));

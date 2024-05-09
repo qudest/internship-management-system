@@ -12,6 +12,7 @@ import org.gitlab4j.api.models.Project;
 import org.gitlab4j.api.models.User;
 import org.springframework.stereotype.Service;
 
+import javax.ws.rs.BadRequestException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +29,7 @@ public class GitlabService {
     LastCheckDateService lastCheckDateService;
     MessageService messageService;
     AdminService adminService;
+    CharSequence defaultPassword = "password2024";
 
     /**
      * Создание проекта в Gitlab
@@ -38,6 +40,9 @@ public class GitlabService {
     public Project createProject(String title) {
         Project project;
         try {
+            if (gitlabApi.getProjectApi().getProject("root", title) != null) {
+                throw new BadRequestException("Project with title " + title + " already exists");
+            }
             project = gitlabApi.getProjectApi().createProject(title);
         } catch (GitLabApiException e) {
             MessageDto messageDto = new MessageDto(
@@ -85,7 +90,9 @@ public class GitlabService {
         user.setEmail(userEntity.getEmail());
         user.setName(userEntity.getFirstName() + " " + userEntity.getLastName());
         try {
-            gitlabApi.getUserApi().createUser(user, userEntity.getAccount().getUsername(), true);
+            if (gitlabApi.getUserApi().getUser(userEntity.getAccount().getUsername()) == null) {
+                gitlabApi.getUserApi().createUser(user, defaultPassword, false);
+            }
         } catch (GitLabApiException e) {
             MessageDto messageDto = new MessageDto(
                     "Error while creating user with username " + userEntity.getAccount().getUsername(),
