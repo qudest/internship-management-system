@@ -3,6 +3,7 @@ package com.ds.ims.api.controller;
 import com.ds.ims.api.dto.InternshipDto;
 import com.ds.ims.api.service.InternshipService;
 import com.ds.ims.api.utils.ApiPaths;
+import io.swagger.annotations.ApiOperation;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -29,6 +30,7 @@ public class PublicController {
      *
      * @return - список стажировок
      */
+    @ApiOperation(value = "Получение списка стажировок, открытых для регистрации")
     @GetMapping(ApiPaths.INTERNSHIPS)
     public List<InternshipDto> getInternships() {
         return internshipService.getInternshipsOpenForRegistration();
@@ -41,6 +43,7 @@ public class PublicController {
      * @param internshipId - идентификатор стажировки
      * @return - стажировка
      */
+    @ApiOperation(value = "Получение стажировки по идентификатору")
     @GetMapping(ApiPaths.INTERNSHIP_BY_ID)
     public InternshipDto getInternshipById(@PathVariable Long internshipId) {
         return internshipService.getInternshipById(internshipId);

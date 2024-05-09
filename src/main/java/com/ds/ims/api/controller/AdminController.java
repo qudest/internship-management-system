@@ -3,6 +3,9 @@ package com.ds.ims.api.controller;
 import com.ds.ims.api.dto.*;
 import com.ds.ims.api.service.*;
 import com.ds.ims.api.utils.ApiPaths;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -34,6 +37,10 @@ public class AdminController {
      * @param internshipDto - данные для создания стажировки
      * @return - ответ с результатом создания стажировки
      */
+    @ApiOperation(value = "Создание стажировки")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "JWT token", required = true, dataType = "string", paramType = "header")
+    })
     @PostMapping(ApiPaths.INTERNSHIPS)
     public ResponseEntity<?> createInternship(@RequestBody InternshipDto internshipDto) {
         return internshipService.createInternship(internshipDto);
@@ -47,6 +54,10 @@ public class AdminController {
      * @param internshipDto - данные для обновления стажировки
      * @return - ответ с результатом обновления стажировки
      */
+    @ApiOperation(value = "Обновление стажировки")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "JWT token", required = true, dataType = "string", paramType = "header")
+    })
     @PutMapping(ApiPaths.INTERNSHIP_BY_ID)
     public ResponseEntity<?> updateInternship(@PathVariable Long internshipId, @RequestBody InternshipDto internshipDto) {
         return internshipService.updateInternship(internshipId, internshipDto);
@@ -59,6 +70,10 @@ public class AdminController {
      * @param internshipId - id стажировки
      * @return - ответ с результатом удаления стажировки
      */
+    @ApiOperation(value = "Удаление стажировки")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "JWT token", required = true, dataType = "string", paramType = "header")
+    })
     @DeleteMapping(ApiPaths.INTERNSHIP_BY_ID)
     public ResponseEntity<?> deleteInternship(@PathVariable Long internshipId) {
         return internshipService.deleteInternship(internshipId);
@@ -72,6 +87,10 @@ public class AdminController {
      * @param lessonDto    - данные для создания урока
      * @return - ответ с результатом создания урока
      */
+    @ApiOperation(value = "Создание урока")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "JWT token", required = true, dataType = "string", paramType = "header")
+    })
     @PostMapping(ApiPaths.INTERNSHIP_BY_ID + ApiPaths.LESSONS)
     public ResponseEntity<?> createLesson(@PathVariable Long internshipId, @RequestBody LessonDto lessonDto) {
         return lessonService.createLesson(internshipId, lessonDto);
@@ -85,6 +104,10 @@ public class AdminController {
      * @param lessonDto - данные для обновления урока
      * @return - ответ с результатом обновления урока
      */
+    @ApiOperation(value = "Обновление урока")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "JWT token", required = true, dataType = "string", paramType = "header")
+    })
     @PutMapping(ApiPaths.LESSON_BY_ID)
     public ResponseEntity<?> updateLesson(@PathVariable Long lessonId, @RequestBody LessonDto lessonDto) {
         return lessonService.updateLesson(lessonId, lessonDto);
@@ -97,6 +120,10 @@ public class AdminController {
      * @param lessonId - id урока
      * @return - ответ с результатом удаления урока
      */
+    @ApiOperation(value = "Удаление урока")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "JWT token", required = true, dataType = "string", paramType = "header")
+    })
     @DeleteMapping(ApiPaths.LESSON_BY_ID)
     public ResponseEntity<?> deleteLesson(@PathVariable Long lessonId) {
         return lessonService.deleteLesson(lessonId);
@@ -110,18 +137,26 @@ public class AdminController {
      * @param creatingTaskDto - данные для создания задания
      * @return - ответ с результатом создания задания
      */
+    @ApiOperation(value = "Создание задания")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "JWT token", required = true, dataType = "string", paramType = "header")
+    })
     @PostMapping(ApiPaths.LESSON_BY_ID + ApiPaths.TASKS)
     public ResponseEntity<?> createTask(@PathVariable Long lessonId, @RequestBody CreatingTaskDto creatingTaskDto) {
         return taskService.createTask(lessonId, creatingTaskDto);
     }
 
     /**
-     * Fork задания для стажеров
+     * Fork задания для пользователей
      * POST /api/admin/tasks/{taskId}
      *
      * @param taskId - id задания
-     * @return - ответ с результатом fork задания для стажеров
+     * @return - ответ с результатом fork задания для пользователей
      */
+    @ApiOperation(value = "Fork задания для пользователей")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "JWT token", required = true, dataType = "string", paramType = "header")
+    })
     @PostMapping(ApiPaths.TASK_BY_ID)
     public ResponseEntity<?> forkTaskForInternshipUsers(@PathVariable Long taskId) {
         return userTaskService.forkTaskForInternshipUsers(taskId);
@@ -134,6 +169,10 @@ public class AdminController {
      * @param internshipId - id стажировки
      * @return - список запросов на стажировку
      */
+    @ApiOperation(value = "Получение ожидающих запросов на стажировку")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "JWT token", required = true, dataType = "string", paramType = "header")
+    })
     @GetMapping(ApiPaths.INTERNSHIP_BY_ID + ApiPaths.REQUESTS)
     public List<RequestDto> getPendingRequestsForInternship(@PathVariable Long internshipId) {
         return internshipRequestService.getPendingInternshipRequests(internshipId);
@@ -147,6 +186,10 @@ public class AdminController {
      * @param isAccepted - принят ли запрос
      * @return - ответ с результатом рассмотрения запроса
      */
+    @ApiOperation(value = "Рассмотрение запроса на стажировку")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "JWT token", required = true, dataType = "string", paramType = "header")
+    })
     @PutMapping(ApiPaths.REQUEST_BY_ID)
     public ResponseEntity<?> considerRequest(@PathVariable Long requestId, @RequestParam boolean isAccepted) {
         return internshipRequestService.considerRequest(requestId, isAccepted);
@@ -159,6 +202,10 @@ public class AdminController {
      * @param internshipId - id стажировки
      * @return - ведомость по стажировке
      */
+    @ApiOperation(value = "Получение ведомости по стажировке")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "JWT token", required = true, dataType = "string", paramType = "header")
+    })
     @GetMapping(ApiPaths.GRADES)
     public List<GradeDto> getGrades(@PathVariable Long internshipId) {
         return userTaskService.getUserGrades(internshipId);
@@ -171,6 +218,10 @@ public class AdminController {
      * @param internshipId - id стажировки
      * @return - список новых коммитов
      */
+    @ApiOperation(value = "Получение новых коммитов для стажировки")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "JWT token", required = true, dataType = "string", paramType = "header")
+    })
     @GetMapping(ApiPaths.NEW_COMMITS)
     public List<CommitDto> getNewCommits(@PathVariable Long internshipId) {
         return userTaskService.getNewCommitsForInternship(internshipId);
@@ -182,6 +233,10 @@ public class AdminController {
      *
      * @return - список сообщений
      */
+    @ApiOperation(value = "Получение сообщений")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "JWT token", required = true, dataType = "string", paramType = "header")
+    })
     @GetMapping(ApiPaths.MESSAGES)
     public List<MessageDto> getMessages() {
         return messageService.getMessages(authService.getAuthenticatedAccountId());
@@ -195,6 +250,10 @@ public class AdminController {
      * @param taskReviewDto - данные для проверки задания
      * @return - ответ с результатом проверки задания
      */
+    @ApiOperation(value = "Проверка задания пользователя")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "JWT token", required = true, dataType = "string", paramType = "header")
+    })
     @PutMapping(ApiPaths.REVIEW)
     public ResponseEntity<?> reviewTask(@PathVariable Long userTaskId, @RequestBody TaskReviewDto taskReviewDto) {
         return userTaskService.reviewTask(userTaskId, taskReviewDto, authService.getAuthenticatedAccountId());

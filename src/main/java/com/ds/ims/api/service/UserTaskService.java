@@ -14,7 +14,6 @@ import org.gitlab4j.api.models.Project;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -235,7 +234,7 @@ public class UserTaskService {
      */
     public ResponseEntity<?> reviewTask(Long userTaskId, TaskReviewDto taskReviewDto, Long authenticatedAccountId) {
         UserTaskEntity userTaskEntity = findById(userTaskId).orElseThrow(() -> new NotFoundException("User task with id " + userTaskId + " not found"));
-        userTaskEntity.setStatus(UserTaskStatus.valueOf(taskReviewDto.getStatus()));
+        userTaskEntity.setStatus(taskReviewDto.getStatus());
 
         AdminEntity adminEntity = adminService.findByAccountId(authenticatedAccountId).orElseThrow(
                 () -> new NotFoundException("Admin with account id " + authenticatedAccountId + " not found")
@@ -248,7 +247,7 @@ public class UserTaskService {
         reviewResult.setText("Task "
                 + userTaskEntity.getTask().getTitle()
                 + "(" + userTaskEntity.getForkedGitlabRepositoryUrl()
-                + ") has been " + taskReviewDto.getStatus().toLowerCase());
+                + ") has been " + taskReviewDto.getStatus().toString().toLowerCase());
         reviewResult.setSenderName(sender);
         reviewResult.setCreatedAt(createdAt);
         messageService.sendMessage(receiver, reviewResult);

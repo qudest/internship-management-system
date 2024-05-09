@@ -4,6 +4,7 @@ import com.ds.ims.api.dto.JwtRequestDto;
 import com.ds.ims.api.dto.RegistrationAccountDto;
 import com.ds.ims.api.service.AuthService;
 import com.ds.ims.api.utils.ApiPaths;
+import io.swagger.annotations.ApiOperation;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -30,6 +31,7 @@ public class AuthController {
      * @param authRequest - данные для авторизации
      * @return - ответ с результатом авторизации
      */
+    @ApiOperation(value = "Создание токена авторизации")
     @PostMapping(ApiPaths.AUTH)
     public ResponseEntity<?> createAuthToken(@RequestBody JwtRequestDto authRequest) {
         return authService.createAuthToken(authRequest);
@@ -42,6 +44,7 @@ public class AuthController {
      * @param registrationAccountDto - данные для регистрации
      * @return - ответ с результатом регистрации
      */
+    @ApiOperation(value = "Регистрация нового пользователя")
     @PostMapping(ApiPaths.REGISTER)
     public ResponseEntity<?> createNewUser(@RequestBody RegistrationAccountDto registrationAccountDto) {
         return authService.createNewAccount(registrationAccountDto);
