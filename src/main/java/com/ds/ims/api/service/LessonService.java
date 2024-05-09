@@ -2,70 +2,126 @@ package com.ds.ims.api.service;
 
 import com.ds.ims.api.dto.LessonDto;
 import com.ds.ims.api.mapper.LessonMapper;
-import com.ds.ims.storage.entity.InternshipUserEntity;
+import com.ds.ims.storage.entity.InternshipEntity;
 import com.ds.ims.storage.entity.LessonEntity;
-import com.ds.ims.storage.entity.status.InternshipUserStatus;
 import com.ds.ims.storage.repository.LessonRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import javax.ws.rs.NotFoundException;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Сервис для работы с уроками
+ */
 @RequiredArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 @Service
 public class LessonService {
     LessonRepository lessonRepository;
     InternshipUserService internshipUserService;
-    UserService userService;
     InternshipService internshipService;
 
+    /**
+     * Получить все уроки по стажировке
+     *
+     * @param internshipId           - id стажировки
+     * @param authenticatedAccountId - id пользователя
+     * @return список уроков
+     */
     public List<LessonDto> getLessons(Long internshipId, Long authenticatedAccountId) {
-        userCheck(internshipId, authenticatedAccountId);
-        return LessonMapper.INSTANCE.toDtos(lessonRepository.findAllByInternshipId(internshipId));
+        internshipUserService.checkUserForMembership(internshipId, authenticatedAccountId);
+        return LessonMapper.INSTANCE.toDtos(findAllByInternshipId(internshipId));
     }
 
-    public LessonDto getLesson(Long internshipId, Long lessonId, Long authenticatedAccountId) {
-        userCheck(internshipId, authenticatedAccountId);
-        return LessonMapper.INSTANCE.toDto(findByIdAndInternshipId(internshipId, lessonId));
+    /**
+     * Получить урок по id
+     *
+     * @param lessonId               - id урока
+     * @param authenticatedAccountId - id пользователя
+     * @return урок
+     */
+    public LessonDto getLesson(Long lessonId, Long authenticatedAccountId) {
+        LessonEntity lessonEntity = findById(lessonId).orElseThrow(() -> new NotFoundException("Lesson with id " + lessonId + " not found"));
+        internshipUserService.checkUserForMembership(lessonEntity.getInternship().getId(), authenticatedAccountId);
+        return LessonMapper.INSTANCE.toDto(lessonEntity);
     }
 
-    public LessonEntity findByIdAndInternshipId(Long internshipId, Long lessonId) {
-        return lessonRepository.findByIdAndInternshipId(internshipId, lessonId).orElseThrow(() -> new RuntimeException("Lesson not found"));
+    /**
+     * Найти урок по id
+     *
+     * @param id - id урока
+     * @return урок
+     */
+    public Optional<LessonEntity> findById(Long id) {
+        return lessonRepository.findById(id);
     }
 
-    //todo перенести в internshipUserService
-    private void userCheck(Long internshipId, Long authenticatedAccountId) {
-        Long userId = userService.findByAccountId(authenticatedAccountId).orElseThrow(() -> new RuntimeException("User not found")).getId();
-        Optional<InternshipUserEntity> internshipUserEntity = internshipUserService.findByUserIdAndInternshipId(userId, internshipId);
-        if (!internshipUserEntity.isPresent()) {
-            throw new RuntimeException("User not registered to this internship");
-        }
-        if (internshipUserEntity.get().getStatus().equals(InternshipUserStatus.EXPELLED)) {
-            throw new RuntimeException("User expelled from internship");
-        }
+    /**
+     * Прооверить существование урока по id
+     *
+     * @param id - id урока
+     * @return true, если урок существует, иначе false
+     */
+    public boolean existsById(Long id) {
+        return lessonRepository.existsById(id);
     }
 
+    /**
+     * Найти все уроки по id стажировки
+     *
+     * @param internshipId - id стажировки
+     * @return список уроков
+     */
+    public List<LessonEntity> findAllByInternshipId(Long internshipId) {
+        return lessonRepository.findAllByInternshipId(internshipId);
+    }
+
+    /**
+     * Создать урок
+     *
+     * @param internshipId - id стажировки
+     * @param lessonDto    - данные для урока
+     * @return созданный урок
+     */
     public ResponseEntity<?> createLesson(Long internshipId, LessonDto lessonDto) {
         LessonEntity lessonEntity = LessonMapper.INSTANCE.toEntity(lessonDto);
-        lessonEntity.setInternship(internshipService.getInternshipEntityById(internshipId));
-        lessonRepository.save(lessonEntity);
-        return ResponseEntity.ok().build();
+        InternshipEntity existingInternship = internshipService.findById(internshipId)
+                .orElseThrow(() -> new NotFoundException("Internship with id " + internshipId + " not found"));
+        lessonEntity.setInternship(existingInternship);
+        LessonEntity savedLesson = lessonRepository.save(lessonEntity);
+        return ResponseEntity.ok(LessonMapper.INSTANCE.toDto(savedLesson));
     }
 
-    public ResponseEntity<?> updateLesson(Long id, Long lessonId, LessonDto lessonDto) {
-        LessonEntity existingLesson = findByIdAndInternshipId(id, lessonId);
+    /**
+     * Обновить урок
+     *
+     * @param lessonId  - id урока
+     * @param lessonDto - данные для урока
+     * @return обновленный урок
+     */
+    public ResponseEntity<?> updateLesson(Long lessonId, LessonDto lessonDto) {
+        LessonEntity existingLesson = findById(lessonId)
+                .orElseThrow(() -> new NotFoundException("Lesson with id " + lessonId + " not found"));
         LessonMapper.INSTANCE.updateEntityFromDto(lessonDto, existingLesson);
         lessonRepository.save(existingLesson);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(LessonMapper.INSTANCE.toDto(existingLesson));
     }
 
-    public ResponseEntity<?> deleteLesson(Long id, Long lessonId) {
-        LessonEntity lessonEntity = findByIdAndInternshipId(id, lessonId);
-        lessonRepository.delete(lessonEntity);
+    /**
+     * Удалить урок
+     *
+     * @param lessonId - id урока
+     * @return ответ
+     */
+    public ResponseEntity<?> deleteLesson(Long lessonId) {
+        if (!existsById(lessonId)) {
+            throw new NotFoundException("Lesson with id " + lessonId + " not found");
+        }
+        lessonRepository.deleteById(lessonId);
         return ResponseEntity.ok().build();
     }
 }

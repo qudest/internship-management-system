@@ -9,8 +9,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.NotFoundException;
 import java.util.Optional;
 
+/**
+ * Сервис для работы с пользователями
+ */
 @RequiredArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 @Service
@@ -18,31 +23,58 @@ public class UserService {
     UserRepository userRepository;
     AccountService accountService;
 
+    /**
+     * Поиск пользователя по id аккаунта
+     *
+     * @param accountId - id аккаунта
+     * @return - пользователь
+     */
     public Optional<UserEntity> findByAccountId(Long accountId) {
         return userRepository.findByAccountId(accountId);
     }
 
+    /**
+     * Создание нового пользователя
+     *
+     * @param accountId - id аккаунта
+     * @param userDto   - данные пользователя
+     * @return - созданный пользователь
+     */
     public UserEntity createNewUser(Long accountId, UserDto userDto) {
         UserEntity userEntity = UserMapper.INSTANCE.toEntity(userDto);
         boolean exists = findByAccountId(accountId).isPresent();
         if (exists) {
-            throw new RuntimeException("User already exists");
+            throw new BadRequestException("User already exists");
         }
-        userEntity.setAccount(accountService.findById(accountId).orElseThrow(() -> new RuntimeException("Account not found")));
+        userEntity.setAccount(accountService.findById(accountId)
+                .orElseThrow(() -> new NotFoundException("Account with id " + accountId + " not found")));
         return userRepository.save(userEntity);
     }
 
-    public void updateUser(Long accountId, UserDto userDto) {
+    /**
+     * Обновление данных пользователя
+     *
+     * @param accountId - id аккаунта
+     * @param userDto   - данные пользователя
+     * @return - обновленный пользователь
+     */
+    public UserEntity updateUser(Long accountId, UserDto userDto) {
         UserEntity existingUser = findByAccountId(accountId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new NotFoundException("User not found"));
         UserMapper.INSTANCE.updateEntityFromDto(userDto, existingUser);
-        userRepository.save(existingUser);
+        return userRepository.save(existingUser);
     }
 
+    /**
+     * Создание или обновление пользователя
+     *
+     * @param accountId - id аккаунта
+     * @param userDto   - данные пользователя
+     * @return - созданный или обновленный пользователь
+     */
     public UserEntity createOrUpdateUser(Long accountId, UserDto userDto) {
         if (findByAccountId(accountId).isPresent()) {
-            updateUser(accountId, userDto);
-            return findByAccountId(accountId).get();
+            return updateUser(accountId, userDto);
         } else {
             return createNewUser(accountId, userDto);
         }

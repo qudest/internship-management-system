@@ -15,13 +15,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.ws.rs.BadRequestException;
+import javax.ws.rs.NotFoundException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Сервис для работы с заданиями пользователей
+ */
 @RequiredArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 @Service
@@ -34,13 +35,20 @@ public class UserTaskService {
     UserService userService;
     MessageService messageService;
 
-    public List<UserTaskDto> getTasks(Long internshipId, Long lessonId, Long authenticatedAccountId) {
-        List<UserTaskEntity> userTasks = userTaskRepository.findAllByUserId(authenticatedAccountId);
+    /**
+     * Получение всех заданий пользователя по id урока
+     *
+     * @param lessonId               - id урока
+     * @param authenticatedAccountId - id аккаунта
+     * @return список заданий пользователя
+     */
+    public List<UserTaskDto> getTasks(Long lessonId, Long authenticatedAccountId) {
+        List<UserTaskEntity> userTasks = findAllByUserId(authenticatedAccountId);
         List<UserTaskDto> userTaskDtos = new ArrayList<>();
 
         for (UserTaskEntity userTask : userTasks) {
             TaskEntity task = userTask.getTask();
-            if (task.getLesson().getId().equals(lessonId) && task.getLesson().getInternship().getId().equals(internshipId)) {
+            if (task.getLesson().getId().equals(lessonId)) {
                 userTaskDtos.add(UserTaskMapper.INSTANCE.toDto(userTask));
             }
         }
@@ -48,45 +56,73 @@ public class UserTaskService {
         return userTaskDtos;
     }
 
-    public UserTaskDto getTask(Long internshipId, Long lessonId, Long taskId, Long authenticatedAccountId) {
-        TaskEntity task = taskService.findById(taskId).orElseThrow(() -> new NullPointerException("Task not found with id: " + taskId));
-
-        if (!task.getLesson().getId().equals(lessonId) || !task.getLesson().getInternship().getId().equals(internshipId)) {
-            throw new BadRequestException("Task does not belong to the specified lesson and internship");
-        }
-
-        UserEntity user = userService.findByAccountId(authenticatedAccountId).orElseThrow(() -> new NullPointerException("User not found with account id: " + authenticatedAccountId));
-
-        UserTaskEntity userTaskEntity = findByUserIdAndTaskId(user.getId(), taskId);
+    /**
+     * Получение задания пользователя по id задания
+     *
+     * @param taskId                 - id задания
+     * @param authenticatedAccountId - id аккаунта
+     * @return задание пользователя
+     */
+    public UserTaskDto getTask(Long taskId, Long authenticatedAccountId) {
+        UserEntity user = userService.findByAccountId(authenticatedAccountId)
+                .orElseThrow(() -> new NotFoundException("User with account id " + authenticatedAccountId + " not found"));
+        UserTaskEntity userTaskEntity = findByUserIdAndTaskId(user.getId(), taskId)
+                .orElseThrow(() -> new NotFoundException("User task with task id " + taskId + " not found"));
         return UserTaskMapper.INSTANCE.toDto(userTaskEntity);
     }
 
-    public UserTaskEntity findByUserIdAndTaskId(Long userId, Long taskId) {
+    /**
+     * Найти задание пользователя по id пользователя и id задания
+     *
+     * @param userId - id пользователя
+     * @param taskId - id задания
+     * @return задание пользователя
+     */
+    public Optional<UserTaskEntity> findByUserIdAndTaskId(Long userId, Long taskId) {
         return userTaskRepository.findByUserIdAndTaskId(userId, taskId);
     }
 
-    public UserTaskEntity findById(Long id) {
-        return userTaskRepository.findById(id).orElseThrow(() -> new NullPointerException("User task not found with id: " + id));
+    /**
+     * Найти задание пользователя по id
+     *
+     * @param id - id задания
+     * @return задание пользователя
+     */
+    public Optional<UserTaskEntity> findById(Long id) {
+        return userTaskRepository.findById(id);
     }
 
-    public UserTaskEntity findByForkedGitlabRepositoryUrl(String url) {
-        return userTaskRepository.findByForkedGitlabRepositoryUrl(url);
-    }
+    /**
+     * Fork задания для всех активных пользователей стажировки
+     *
+     * @param taskId - id задания
+     * @return статус выполнения
+     */
+    public ResponseEntity<?> forkTaskForInternshipUsers(Long taskId) {
+        TaskEntity task = taskService.findById(taskId).orElseThrow(() -> new NotFoundException("Task with id " + taskId + " not found"));
+        Long internshipId = task.getLesson().getInternship().getId();
 
-    public ResponseEntity<?> forkTaskForInternshipUsers(Long id, Long lessonId, Long taskId) {
-        List<UserEntity> users = internshipUserService.findAllByInternshipIdAndStatus(id, InternshipUserStatus.ACTIVE)
+        List<UserEntity> users = internshipUserService.findAllByInternshipIdAndStatus(internshipId, InternshipUserStatus.ACTIVE)
                 .stream()
                 .map(InternshipUserEntity::getUser)
                 .collect(Collectors.toList());
-        TaskEntity task = taskService.findById(taskId).get();
+
         for (UserEntity user : users) {
             Project project = gitlabService.forkProjectForUser(task.getTitle(), user.getAccount().getUsername());
-            create(user, task, project.getHttpUrlToRepo());
+            createUserTask(user, task, project.getHttpUrlToRepo());
         }
+
         return ResponseEntity.ok().build();
     }
 
-    public void create(UserEntity user, TaskEntity task, String httpUrlToRepo) {
+    /**
+     * Создание задания пользователя
+     *
+     * @param user          - пользователь
+     * @param task          - задание
+     * @param httpUrlToRepo - ссылка на репозиторий
+     */
+    public void createUserTask(UserEntity user, TaskEntity task, String httpUrlToRepo) {
         UserTaskEntity userTaskEntity = new UserTaskEntity();
         userTaskEntity.setUser(user);
         userTaskEntity.setTask(task);
@@ -96,8 +132,24 @@ public class UserTaskService {
         userTaskRepository.save(userTaskEntity);
     }
 
+    /**
+     * Найти все задания пользователя по id пользователя
+     *
+     * @param userId - id пользователя
+     * @return список заданий пользователя
+     */
+    public List<UserTaskEntity> findAllByUserId(Long userId) {
+        return userTaskRepository.findAllByUserId(userId);
+    }
+
+    /**
+     * Получение успеваемости пользователя по стажировке
+     * @param internshipId - id стажировки
+     * @param user - пользователь
+     * @return успеваемость пользователя
+     */
     private GradeDto getGrade(Long internshipId, UserEntity user) {
-        List<UserTaskEntity> userTasks = userTaskRepository.findAllByUserId(user.getId());
+        List<UserTaskEntity> userTasks = findAllByUserId(user.getId());
         List<UserTaskDto> userTaskDtos = new ArrayList<>();
         for (UserTaskEntity userTask : userTasks) {
             if (userTask.getTask().getLesson().getInternship().getId().equals(internshipId)) {
@@ -110,12 +162,24 @@ public class UserTaskService {
         return gradeDto;
     }
 
+    /**
+     * Получение успеваемости пользователя по стажировке
+     * @param internshipId - id стажировки
+     * @param authenticatedAccountId - id аккаунта
+     * @return успеваемость пользователя
+     */
     public GradeDto getUserGrade(Long internshipId, Long authenticatedAccountId) {
-        UserEntity user = userService.findByAccountId(authenticatedAccountId).orElseThrow(() -> new NullPointerException("User not found with account id: " + authenticatedAccountId));
+        UserEntity user = userService.findByAccountId(authenticatedAccountId)
+                .orElseThrow(() -> new NotFoundException("User with account id " + authenticatedAccountId + " not found"));
         return getGrade(internshipId, user);
     }
 
-    public List<GradeDto> getUsersGrade(Long internshipId) {
+    /**
+     * Получение успеваемости всех пользователей по стажировке
+     * @param internshipId - id стажировки
+     * @return успеваемость всех пользователей
+     */
+    public List<GradeDto> getUserGrades(Long internshipId) {
         List<InternshipUserEntity> internshipUsers = internshipUserService.findAllByInternshipIdAndStatus(internshipId, InternshipUserStatus.ACTIVE);
         List<GradeDto> gradeDtos = new ArrayList<>();
         for (InternshipUserEntity internshipUser : internshipUsers) {
@@ -125,26 +189,55 @@ public class UserTaskService {
         return gradeDtos;
     }
 
-    public List<CommitDto> getFreshCommits() {
+    /**
+     * Получение задания пользователя по ссылке на репозиторий
+     * @param url - ссылка на репозиторий
+     * @return задание пользователя
+     */
+    public Optional<UserTaskEntity> findByForkedGitlabRepositoryUrl(String url) {
+        return userTaskRepository.findByForkedGitlabRepositoryUrl(url);
+    }
+
+    /**
+     * Получение новых коммитов для стажировки
+     * @param internshipId - id стажировки
+     * @return список новых коммитов
+     */
+    public List<CommitDto> getNewCommitsForInternship(Long internshipId) {
         List<CommitDto> commitDtos = new ArrayList<>();
         Map<String, List<Commit>> commits = gitlabService.getCommits();
+
         for (Map.Entry<String, List<Commit>> entry : commits.entrySet()) {
-            UserTaskEntity userTaskEntity = userTaskRepository.findByForkedGitlabRepositoryUrl(entry.getKey());
-            if (userTaskEntity.getStatus() == UserTaskStatus.ACCEPTED) {
+            UserTaskEntity userTaskEntity = findByForkedGitlabRepositoryUrl(entry.getKey()).orElseThrow(
+                    () -> new NotFoundException("User task not found with forked gitlab repository url: " + entry.getKey())
+            );
+            Long taskInternshipId = userTaskEntity.getTask().getLesson().getInternship().getId();
+            if (userTaskEntity.getStatus().equals(UserTaskStatus.ACCEPTED) || !taskInternshipId.equals(internshipId)) {
                 continue;
             }
             for (Commit commit : entry.getValue()) {
                 commitDtos.add(CommitMapper.INSTANCE.toDto(userTaskEntity, commit));
             }
         }
+
         return commitDtos;
     }
 
+    /**
+     * Проверка коммита
+     * @param userTaskId - id задания пользователя
+     * @param taskReviewDto - результат проверки
+     * @param authenticatedAccountId - id авторизованного аккаунта
+     * @return статус выполнения
+     */
     public ResponseEntity<?> reviewTask(Long userTaskId, TaskReviewDto taskReviewDto, Long authenticatedAccountId) {
-        UserTaskEntity userTaskEntity = findById(userTaskId);
+        UserTaskEntity userTaskEntity = findById(userTaskId).orElseThrow(() -> new NotFoundException("User task with id " + userTaskId + " not found"));
         userTaskEntity.setStatus(UserTaskStatus.valueOf(taskReviewDto.getStatus()));
 
-        String sender = adminService.findByAccountId(authenticatedAccountId).getName();
+        AdminEntity adminEntity = adminService.findByAccountId(authenticatedAccountId).orElseThrow(
+                () -> new NotFoundException("Admin with account id " + authenticatedAccountId + " not found")
+        );
+        String sender = adminEntity.getName();
         LocalDateTime createdAt = LocalDateTime.now();
         AccountEntity receiver = userTaskEntity.getUser().getAccount();
 

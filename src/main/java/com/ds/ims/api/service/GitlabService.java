@@ -1,9 +1,7 @@
 package com.ds.ims.api.service;
 
-import com.ds.ims.api.dto.CreatingTaskDto;
 import com.ds.ims.api.dto.MessageDto;
-import com.ds.ims.api.mapper.TaskMapper;
-import com.ds.ims.storage.entity.TaskEntity;
+import com.ds.ims.api.exception.GitlabException;
 import com.ds.ims.storage.entity.UserEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -14,12 +12,14 @@ import org.gitlab4j.api.models.Project;
 import org.gitlab4j.api.models.User;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Сервис для работы с Gitlab Api
+ */
 @RequiredArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 @Service
@@ -29,57 +29,82 @@ public class GitlabService {
     MessageService messageService;
     AdminService adminService;
 
-    public TaskEntity createProject(CreatingTaskDto creatingTaskDto) {
+    /**
+     * Создание проекта в Gitlab
+     *
+     * @param title - название проекта
+     * @return созданный проект
+     */
+    public Project createProject(String title) {
         Project project;
         try {
-            project = gitlabApi.getProjectApi().createProject(creatingTaskDto.getTitle());
+            project = gitlabApi.getProjectApi().createProject(title);
         } catch (GitLabApiException e) {
-            throw new RuntimeException("Error while creating project", e);
+            MessageDto messageDto = new MessageDto(
+                    "Error while creating project with title " + title,
+                    "System"
+            );
+            adminService.findAll().forEach(adminEntity -> messageService.sendMessage(adminEntity.getAccount(), messageDto));
+
+            throw new GitlabException("Error while creating project: " + e.getMessage());
         }
-        return TaskMapper.INSTANCE.gitlabProjectToTaskEntity(project);
+        return project;
     }
 
-    public void deleteProject(String projectName) {
-        Project project;
-        try {
-            project = gitlabApi.getProjectApi().getProject("root", projectName);
-            gitlabApi.getProjectApi().deleteProject(project);
-        } catch (GitLabApiException e) {
-            throw new RuntimeException("Error while deleting project", e);
-        }
-    }
-
+    /**
+     * Fork проекта для пользователя
+     *
+     * @param projectName - название проекта
+     * @param username    - имя пользователя
+     * @return созданный проект
+     */
     public Project forkProjectForUser(String projectName, String username) {
         Project project;
         try {
             project = gitlabApi.getProjectApi().getProject("root", projectName);
             return gitlabApi.getProjectApi().forkProject(project.getId(), username);
         } catch (GitLabApiException e) {
-            MessageDto messageDto = new MessageDto();
-            messageDto.setText("Error while forking project for user " + username + " with project name " + projectName);
-            messageDto.setCreatedAt(LocalDateTime.now());
-            messageDto.setSenderName("System");
+            MessageDto messageDto = new MessageDto(
+                    "Error while forking project with project name " + projectName + " for user with username " + username,
+                    "System"
+            );
             adminService.findAll().forEach(adminEntity -> messageService.sendMessage(adminEntity.getAccount(), messageDto));
-            throw new RuntimeException("Error while forking project", e);
+
+            throw new GitlabException("Error while forking project: " + e.getMessage());
         }
     }
 
-    public User createUser(UserEntity userEntity) {
+    /**
+     * Создание пользователя в Gitlab
+     *
+     * @param userEntity - пользователь
+     */
+    public void createUser(UserEntity userEntity) {
         User user = new User();
         user.setUsername(userEntity.getAccount().getUsername());
         user.setEmail(userEntity.getEmail());
         user.setName(userEntity.getFirstName() + " " + userEntity.getLastName());
         try {
-            gitlabApi.getUserApi().createUser(user, userEntity.getAccount().getUsername(), false);
+            gitlabApi.getUserApi().createUser(user, userEntity.getAccount().getUsername(), true);
         } catch (GitLabApiException e) {
-            throw new RuntimeException("Error while creating user", e);
+            MessageDto messageDto = new MessageDto(
+                    "Error while creating user with username " + userEntity.getAccount().getUsername(),
+                    "System"
+            );
+            adminService.findAll().forEach(adminEntity -> messageService.sendMessage(adminEntity.getAccount(), messageDto));
+
+            throw new GitlabException("Error while creating user: " + e.getMessage());
         }
-        return user;
     }
 
+    /**
+     * Получение всех коммитов
+     *
+     * @return все коммиты
+     */
     public Map<String, List<Commit>> getCommits() {
+        Map<String, List<Commit>> allCommits = new HashMap<>();
         try {
-            Map<String, List<Commit>> allCommits = new HashMap<>();
             List<Project> projects = gitlabApi.getProjectApi().getProjects();
             for (Project project : projects) {
                 if (project.getOwner().getUsername().equals("root")) {
@@ -90,10 +115,10 @@ public class GitlabService {
                 allCommits.put(project.getHttpUrlToRepo(), commits);
                 lastCheckDateService.updateLastCheckDateByUrl(project.getHttpUrlToRepo(), new Date());
             }
-            return allCommits;
         } catch (GitLabApiException e) {
-            throw new RuntimeException(e);
+            throw new GitlabException("Error while getting commits: " + e.getMessage());
         }
+        return allCommits;
     }
 }
 

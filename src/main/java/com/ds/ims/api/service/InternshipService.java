@@ -1,104 +1,118 @@
 package com.ds.ims.api.service;
 
 import com.ds.ims.api.dto.InternshipDto;
-import com.ds.ims.api.dto.UserDto;
 import com.ds.ims.api.mapper.InternshipMapper;
 import com.ds.ims.storage.entity.InternshipEntity;
-import com.ds.ims.storage.entity.InternshipUserEntity;
-import com.ds.ims.storage.entity.UserEntity;
 import com.ds.ims.storage.entity.status.InternshipStatus;
-import com.ds.ims.storage.entity.status.InternshipUserStatus;
 import com.ds.ims.storage.repository.InternshipRepository;
-import com.ds.ims.storage.repository.InternshipUserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import javax.ws.rs.NotFoundException;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Сервис для работы с стажировками
+ */
 @RequiredArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 @Service
 public class InternshipService {
-    UserService userService;
     InternshipRepository internshipRepository;
-    InternshipUserService internshipUserService;
-    InternshipRequestService internshipRequestService;
 
-    public InternshipEntity getInternshipEntityById(Long id) {
-        return internshipRepository.findById(id).orElseThrow(() -> new RuntimeException("Internship not found"));
+    /**
+     * Поиск стажировки по id
+     *
+     * @param id - id стажировки
+     * @return - стажировка
+     */
+    public Optional<InternshipEntity> findById(Long id) {
+        return internshipRepository.findById(id);
     }
 
-    public Optional<InternshipDto> getInternshipById(Long id) {
-        InternshipEntity internship = getInternshipEntityById(id);
-        return Optional.of(InternshipMapper.INSTANCE.toDto(internship));
+    /**
+     * Проверка существования стажировки по id
+     *
+     * @param id - id стажировки
+     * @return - true, если стажировка существует, иначе false
+     */
+    public boolean existsById(Long id) {
+        return internshipRepository.existsById(id);
     }
 
+    /**
+     * Поиск всех стажировок по статусу
+     *
+     * @param status - статус стажировки
+     * @return - список стажировок
+     */
+    public List<InternshipEntity> findAllByStatus(InternshipStatus status) {
+        return internshipRepository.findAllByStatus(status);
+    }
+
+    /**
+     * Получение стажировки по id
+     *
+     * @param id - id стажировки
+     * @return - стажировка
+     */
+    public InternshipDto getInternshipById(Long id) {
+        InternshipEntity internship = findById(id).orElseThrow(() -> new NotFoundException("Internship with id " + id + " not found"));
+        return InternshipMapper.INSTANCE.toDto(internship);
+    }
+
+    /**
+     * Получение всех стажировок, открытых для регистрации
+     *
+     * @return - список стажировок
+     */
     public List<InternshipDto> getInternshipsOpenForRegistration() {
-        List<InternshipEntity> internships = internshipRepository.findAllByStatus(InternshipStatus.OPEN_FOR_REGISTRATION);
+        List<InternshipEntity> internships = findAllByStatus(InternshipStatus.OPEN_FOR_REGISTRATION);
         return InternshipMapper.INSTANCE.toDtos(internships);
     }
 
-    //todo в internshipUserEntity перенести
-    public List<InternshipDto> getInternshipsForUser(Long accountId) {
-        Long userId = userService.findByAccountId(accountId).orElseThrow(() -> new RuntimeException("User not found")).getId();
-        List<InternshipUserEntity> internshipUserEntities = internshipUserService.findByUserIdAndStatus(userId, InternshipUserStatus.ACTIVE);
-        List<InternshipDto> internships = new ArrayList<>();
-        for (InternshipUserEntity internshipUserEntity: internshipUserEntities) {
-            System.out.println(internshipUserEntity.getInternship().getId());
-            internships.add(InternshipMapper.INSTANCE.toDto(internshipUserEntity.getInternship()));
-        }
-        return internships;
-    }
-    //todo в InternshipRequestService перенести
-    public ResponseEntity<?> registerToInternship(Long internshipId, Long accountId, UserDto userDto) {
-        InternshipEntity internship = internshipRepository.findById(internshipId).orElseThrow(() -> new RuntimeException("Internship not found"));
-
-        if (!internship.getStatus().equals(InternshipStatus.OPEN_FOR_REGISTRATION)) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-
-        UserEntity userEntity = userService.createOrUpdateUser(accountId, userDto);
-        internshipRequestService.createInternshipRequest(internship, userEntity);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-    //todo в InternshipRequestService перенести
-    public ResponseEntity<?> deleteRequestToInternship(Long internshipId, Long accountId) {
-        InternshipEntity internship = internshipRepository.findById(internshipId).orElseThrow(() -> new RuntimeException("Internship not found"));
-
-        if (!internship.getStatus().equals(InternshipStatus.OPEN_FOR_REGISTRATION)) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-        UserEntity user = userService.findByAccountId(accountId).orElseThrow(() -> new RuntimeException("User not found"));
-
-        internshipRequestService.deleteInternshipRequest(internship, user);
-
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
+    /**
+     * Создание стажировки
+     *
+     * @param internshipDto - данные стажировки
+     * @return - ответ
+     */
     public ResponseEntity<?> createInternship(InternshipDto internshipDto) {
-        System.out.println(internshipDto);
-        InternshipEntity internship = InternshipMapper.INSTANCE.toEntity(internshipDto);
-        System.out.printf(internship.toString());
-        internship.setStatus(InternshipStatus.OPEN_FOR_REGISTRATION);
-        internshipRepository.save(internship);
-        return new ResponseEntity<>(HttpStatus.OK);
+        InternshipEntity internshipEntity = InternshipMapper.INSTANCE.toEntity(internshipDto);
+        internshipEntity.setStatus(InternshipStatus.OPEN_FOR_REGISTRATION);
+        InternshipEntity savedInternship = internshipRepository.save(internshipEntity);
+        return ResponseEntity.ok(InternshipMapper.INSTANCE.toDto(savedInternship));
     }
 
-    public ResponseEntity<?> updateInternship(Long id, InternshipDto internshipDto) {
-        InternshipEntity existingInternship = getInternshipEntityById(id);
+    /**
+     * Обновление стажировки
+     *
+     * @param internshipId - id стажировки
+     * @param internshipDto - данные стажировки
+     * @return - ответ
+     */
+    public ResponseEntity<?> updateInternship(Long internshipId, InternshipDto internshipDto) {
+        InternshipEntity existingInternship = findById(internshipId)
+                .orElseThrow(() -> new NotFoundException("Internship with id " + internshipId + " not found"));
         InternshipMapper.INSTANCE.updateEntityFromDto(internshipDto, existingInternship);
         internshipRepository.save(existingInternship);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok(InternshipMapper.INSTANCE.toDto(existingInternship));
     }
 
-    public ResponseEntity<?> deleteInternship(Long id) {
-        InternshipEntity internship = getInternshipEntityById(id);
-        internshipRepository.delete(internship);
-        return new ResponseEntity<>(HttpStatus.OK);
+    /**
+     * Удаление стажировки
+     *
+     * @param internshipId - id стажировки
+     * @return - ответ
+     */
+    public ResponseEntity<?> deleteInternship(Long internshipId) {
+        if (!existsById(internshipId)) {
+            throw new NotFoundException("Internship with id " + internshipId + " not found");
+        }
+        internshipRepository.deleteById(internshipId);
+        return ResponseEntity.ok().build();
     }
 }

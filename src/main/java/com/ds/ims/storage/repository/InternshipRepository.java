@@ -7,7 +7,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Репозиторий для работы с стажировками
+ */
 public interface InternshipRepository extends JpaRepository<InternshipEntity, Long> {
     Optional<InternshipEntity> findById(Long id);
+
+    void deleteById(Long id);
+
+    boolean existsById(Long id);
+
     List<InternshipEntity> findAllByStatus(InternshipStatus status);
 }
