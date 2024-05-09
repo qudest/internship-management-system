@@ -12,6 +12,9 @@ import javax.ws.rs.NotFoundException;
 
 import static org.springframework.http.HttpStatus.*;
 
+/**
+ * Глобальный обработчик исключений
+ */
 @ControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler(NotFoundException.class)

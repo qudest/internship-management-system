@@ -7,9 +7,14 @@ import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 
+/**
+ * Маппер для задачи пользователя
+ */
 @Mapper(uses = TaskMapper.class)
 public interface UserTaskMapper {
     UserTaskMapper INSTANCE = Mappers.getMapper(UserTaskMapper.class);
+
     UserTaskDto toDto(UserTaskEntity userTaskEntity);
+
     List<UserTaskDto> toDtos(List<UserTaskEntity> userTaskEntities);
 }

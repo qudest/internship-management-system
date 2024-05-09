@@ -6,6 +6,9 @@ import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
 
+/**
+ * DTO для ошибки
+ */
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ErrorDto {

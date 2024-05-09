@@ -9,14 +9,20 @@ import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 
+/**
+ * Маппер для урока
+ */
 @Mapper
 public interface LessonMapper {
     LessonMapper INSTANCE = Mappers.getMapper(LessonMapper.class);
+
     LessonDto toDto(LessonEntity lessonEntity);
+
     List<LessonDto> toDtos(List<LessonEntity> lessonEntities);
+
     @Mapping(target = "id", ignore = true)
     LessonEntity toEntity(LessonDto lessonDto);
+
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "internship", ignore = true)
     void updateEntityFromDto(LessonDto lessonDto, @MappingTarget LessonEntity existingLesson);
 }

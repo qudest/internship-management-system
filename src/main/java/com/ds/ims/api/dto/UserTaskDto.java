@@ -5,6 +5,9 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
 
+/**
+ * DTO для задачи пользователя
+ */
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserTaskDto {

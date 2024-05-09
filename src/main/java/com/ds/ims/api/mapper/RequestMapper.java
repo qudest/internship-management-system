@@ -9,10 +9,16 @@ import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 
+/**
+ * Маппер для заявки на стажировку
+ */
 @Mapper(uses = UserMapper.class)
 public interface RequestMapper {
     RequestMapper INSTANCE = Mappers.getMapper(RequestMapper.class);
+
     RequestDto toDto(InternshipRequestEntity requestEntity);
+
     List<RequestDto> toDtos(List<InternshipRequestEntity> requestEntities);
+
     void updateEntityStatus(@MappingTarget InternshipRequestEntity requestEntity, InternshipRequestStatus status);
 }
