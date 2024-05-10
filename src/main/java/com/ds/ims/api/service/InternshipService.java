@@ -37,16 +37,6 @@ public class InternshipService {
     }
 
     /**
-     * Проверка существования стажировки по id
-     *
-     * @param id - id стажировки
-     * @return - true, если стажировка существует, иначе false
-     */
-    public boolean existsById(Long id) {
-        return internshipRepository.existsById(id);
-    }
-
-    /**
      * Поиск всех стажировок по статусу
      *
      * @param status - статус стажировки
@@ -113,19 +103,5 @@ public class InternshipService {
 
         internshipRepository.save(existingInternship);
         return ResponseEntity.ok(InternshipMapper.INSTANCE.toDto(existingInternship));
-    }
-
-    /**
-     * Удаление стажировки
-     *
-     * @param internshipId - id стажировки
-     * @return - ответ
-     */
-    public ResponseEntity<?> deleteInternship(Long internshipId) {
-        if (!existsById(internshipId)) {
-            throw new NotFoundException("Internship with id " + internshipId + " not found");
-        }
-        internshipRepository.deleteById(internshipId);
-        return ResponseEntity.ok().build();
     }
 }

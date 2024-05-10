@@ -66,22 +66,6 @@ public class AdminController {
     }
 
     /**
-     * Удаление стажировки
-     * DELETE /api/admin/internships/{id}
-     *
-     * @param internshipId - id стажировки
-     * @return - ответ с результатом удаления стажировки
-     */
-    @ApiOperation(value = "Удаление стажировки")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "JWT token", required = true, dataType = "string", paramType = "header")
-    })
-    @DeleteMapping(ApiPaths.INTERNSHIP_BY_ID)
-    public ResponseEntity<?> deleteInternship(@PathVariable Long internshipId) {
-        return internshipService.deleteInternship(internshipId);
-    }
-
-    /**
      * Создание урока
      * POST /api/admin/internships/{id}/lessons
      *
