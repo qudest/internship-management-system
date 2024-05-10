@@ -9,6 +9,7 @@ import com.ds.ims.storage.entity.status.InternshipUserStatus;
 import com.ds.ims.storage.repository.InternshipUserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.ws.rs.BadRequestException;
@@ -114,5 +115,33 @@ public class InternshipUserService {
         if (!internshipUserEntity.isPresent()) {
             throw new ForbiddenException("User don't have access to this internship");
         }
+    }
+
+    /**
+     * Обновить статус
+     *
+     * @param internshipUserEntity - пользователь стажировки
+     * @param status               - статус
+     */
+    public void updateStatus(InternshipUserEntity internshipUserEntity, InternshipUserStatus status) {
+        internshipUserEntity.setStatus(status);
+        internshipUserRepository.save(internshipUserEntity);
+        ResponseEntity.ok().build();
+    }
+
+    /**
+     * Обновить статус
+     *
+     * @param internshipId - id стажировки
+     * @param userId       - id пользователя
+     * @param status       - статус
+     * @return ответ
+     */
+    public ResponseEntity<?> updateStatus(Long internshipId, Long userId, InternshipUserStatus status) {
+        InternshipUserEntity internshipUserEntity = findByUserIdAndInternshipId(userId, internshipId)
+                .orElseThrow(() -> new NotFoundException("User not registered to this internship"));
+        internshipUserEntity.setStatus(status);
+        internshipUserRepository.save(internshipUserEntity);
+        return ResponseEntity.ok().build();
     }
 }

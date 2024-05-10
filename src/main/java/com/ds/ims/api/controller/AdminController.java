@@ -3,6 +3,7 @@ package com.ds.ims.api.controller;
 import com.ds.ims.api.dto.*;
 import com.ds.ims.api.service.*;
 import com.ds.ims.api.utils.ApiPaths;
+import com.ds.ims.storage.entity.status.InternshipUserStatus;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
@@ -29,6 +30,7 @@ public class AdminController {
     InternshipRequestService internshipRequestService;
     UserTaskService userTaskService;
     MessageService messageService;
+    InternshipUserService internshipUserService;
 
     /**
      * Создание стажировки
@@ -204,7 +206,7 @@ public class AdminController {
      */
     @ApiOperation(value = "Получение ведомости по стажировке")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "JWT token", required = true, dataType = "string", paramType = "header")
+            @ApiImplicitParam(name = "Authorization", value = "JWT token", required = true, dataType = "string", paramType = "header")                                                // goida
     })
     @GetMapping(ApiPaths.GRADES)
     public List<GradeDto> getGrades(@PathVariable Long internshipId) {
@@ -257,5 +259,23 @@ public class AdminController {
     @PutMapping(ApiPaths.REVIEW)
     public ResponseEntity<?> reviewTask(@PathVariable Long userTaskId, @RequestBody TaskReviewDto taskReviewDto) {
         return userTaskService.reviewTask(userTaskId, taskReviewDto, authService.getAuthenticatedAccountId());
+    }
+
+    /**
+     * Обновление статуса пользователя стажировки
+     * PUT /api/admin/internships/{internshipId}/users/{userId}
+     *
+     * @param internshipId - id стажировки
+     * @param userId - id пользователя
+     * @param status - статус
+     * @return - ответ с результатом обновления статуса пользователя стажировки
+     */
+    @ApiOperation(value = "Обновление статуса пользователя стажировки")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "Authorization", value = "JWT token", required = true, dataType = "string", paramType = "header")
+    })
+    @PutMapping(ApiPaths.INTERNSHIP_USER_BY_ID)
+    public ResponseEntity<?> updateInternshipUserStatus(@PathVariable Long internshipId, @PathVariable Long userId, @RequestParam InternshipUserStatus status) {
+        return internshipUserService.updateStatus(internshipId, userId, status);
     }
 }

@@ -3,7 +3,9 @@ package com.ds.ims.api.service;
 import com.ds.ims.api.dto.InternshipDto;
 import com.ds.ims.api.mapper.InternshipMapper;
 import com.ds.ims.storage.entity.InternshipEntity;
+import com.ds.ims.storage.entity.InternshipUserEntity;
 import com.ds.ims.storage.entity.status.InternshipStatus;
+import com.ds.ims.storage.entity.status.InternshipUserStatus;
 import com.ds.ims.storage.repository.InternshipRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -22,6 +24,7 @@ import java.util.Optional;
 @Service
 public class InternshipService {
     InternshipRepository internshipRepository;
+    InternshipUserService internshipUserService;
 
     /**
      * Поиск стажировки по id
@@ -98,6 +101,16 @@ public class InternshipService {
         InternshipEntity existingInternship = findById(internshipId)
                 .orElseThrow(() -> new NotFoundException("Internship with id " + internshipId + " not found"));
         InternshipMapper.INSTANCE.updateEntityFromDto(internshipDto, existingInternship);
+
+        if (internshipDto.getStatus().equals(InternshipStatus.ENDED)) {
+            List<InternshipUserEntity> internshipUsers = internshipUserService.findAllByInternshipIdAndStatus(
+                    existingInternship.getId(), InternshipUserStatus.ACTIVE
+            );
+            for (InternshipUserEntity internshipUser : internshipUsers) {
+                internshipUserService.updateStatus(internshipUser, InternshipUserStatus.COMPLETED);
+            }
+        }
+
         internshipRepository.save(existingInternship);
         return ResponseEntity.ok(InternshipMapper.INSTANCE.toDto(existingInternship));
     }
