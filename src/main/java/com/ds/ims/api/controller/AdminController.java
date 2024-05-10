@@ -100,22 +100,6 @@ public class AdminController {
     }
 
     /**
-     * Удаление урока
-     * DELETE /api/admin/lessons/{id}
-     *
-     * @param lessonId - id урока
-     * @return - ответ с результатом удаления урока
-     */
-    @ApiOperation(value = "Удаление урока")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "Authorization", value = "JWT token", required = true, dataType = "string", paramType = "header")
-    })
-    @DeleteMapping(ApiPaths.LESSON_BY_ID)
-    public ResponseEntity<?> deleteLesson(@PathVariable Long lessonId) {
-        return lessonService.deleteLesson(lessonId);
-    }
-
-    /**
      * Создание задания
      * POST /api/admin/lessons/{id}/tasks
      *

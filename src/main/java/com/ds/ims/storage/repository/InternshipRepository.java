@@ -13,9 +13,5 @@ import java.util.Optional;
 public interface InternshipRepository extends JpaRepository<InternshipEntity, Long> {
     Optional<InternshipEntity> findById(Long id);
 
-    void deleteById(Long id);
-
-    boolean existsById(Long id);
-
     List<InternshipEntity> findAllByStatus(InternshipStatus status);
 }

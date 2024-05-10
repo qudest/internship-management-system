@@ -12,9 +12,5 @@ import java.util.Optional;
 public interface LessonRepository extends JpaRepository<LessonEntity, Long> {
     Optional<LessonEntity> findById(Long id);
 
-    void deleteById(Long id);
-
-    boolean existsById(Long id);
-
     List<LessonEntity> findAllByInternshipId(Long internshipId);
 }

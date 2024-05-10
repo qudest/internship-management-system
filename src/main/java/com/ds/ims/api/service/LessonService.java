@@ -61,16 +61,6 @@ public class LessonService {
     }
 
     /**
-     * Прооверить существование урока по id
-     *
-     * @param id - id урока
-     * @return true, если урок существует, иначе false
-     */
-    public boolean existsById(Long id) {
-        return lessonRepository.existsById(id);
-    }
-
-    /**
      * Найти все уроки по id стажировки
      *
      * @param internshipId - id стажировки
@@ -109,19 +99,5 @@ public class LessonService {
         LessonMapper.INSTANCE.updateEntityFromDto(lessonDto, existingLesson);
         lessonRepository.save(existingLesson);
         return ResponseEntity.ok(LessonMapper.INSTANCE.toDto(existingLesson));
-    }
-
-    /**
-     * Удалить урок
-     *
-     * @param lessonId - id урока
-     * @return ответ
-     */
-    public ResponseEntity<?> deleteLesson(Long lessonId) {
-        if (!existsById(lessonId)) {
-            throw new NotFoundException("Lesson with id " + lessonId + " not found");
-        }
-        lessonRepository.deleteById(lessonId);
-        return ResponseEntity.ok().build();
     }
 }
